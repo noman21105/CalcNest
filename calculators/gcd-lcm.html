@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCD/LCM Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">GCD/LCM Calculator</h1>
+            <p class="page-description">Calculate Greatest Common Divisor and Least Common Multiple</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Numbers (comma-separated):</label>
+                <input type="text" id="numbers" class="input-field" placeholder="Enter numbers separated by commas (e.g., 12, 18, 24)">
+            </div>
+
+            <button onclick="calculateGcdLcm()" class="calculate-btn">Calculate GCD & LCM</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Results</h3>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function gcd(a, b) {
+            while (b !== 0) {
+                const temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return Math.abs(a);
+        }
+        
+        function lcm(a, b) {
+            return Math.abs(a * b) / gcd(a, b);
+        }
+        
+        function gcdMultiple(numbers) {
+            return numbers.reduce(gcd);
+        }
+        
+        function lcmMultiple(numbers) {
+            return numbers.reduce(lcm);
+        }
+        
+        function parseNumbers(input) {
+            return input.split(',')
+                       .map(n => n.trim())
+                       .filter(n => n !== '')
+                       .map(n => {
+                           const num = parseInt(n);
+                           if (isNaN(num) || num <= 0) {
+                               throw new Error(`"${n}" is not a valid positive integer`);
+                           }
+                           return num;
+                       });
+        }
+        
+        function getPrimeFactorization(n) {
+            const factors = {};
+            let d = 2;
+            while (d * d <= n) {
+                while (n % d === 0) {
+                    factors[d] = (factors[d] || 0) + 1;
+                    n /= d;
+                }
+                d++;
+            }
+            if (n > 1) factors[n] = (factors[n] || 0) + 1;
+            return factors;
+        }
+        
+        function formatPrimeFactorization(factors) {
+            return Object.entries(factors)
+                        .map(([prime, power]) => power === 1 ? prime : `${prime}^${power}`)
+                        .join(' × ');
+        }
+
+        function calculateGcdLcm() {
+            try {
+                const input = document.getElementById('numbers').value.trim();
+                
+                if (!input) {
+                    throw new Error('Please enter some numbers');
+                }
+                
+                const numbers = parseNumbers(input);
+                
+                if (numbers.length < 2) {
+                    throw new Error('Please enter at least 2 numbers');
+                }
+                
+                if (numbers.some(n => n > 1000000)) {
+                    throw new Error('Numbers too large. Please enter numbers less than 1,000,000');
+                }
+                
+                const gcdResult = gcdMultiple(numbers);
+                const lcmResult = lcmMultiple(numbers);
+                
+                // Show prime factorization for better understanding
+                const primeFactorizations = numbers.map(n => ({
+                    number: n,
+                    factors: getPrimeFactorization(n)
+                }));
+                
+                let factorizationText = primeFactorizations.map(pf => 
+                    `${formatNumber(pf.number)} = ${formatPrimeFactorization(pf.factors)}`
+                ).join('<br>');
+                
+                document.getElementById('result').innerHTML = `
+                    <h3 class="result-title">Results</h3>
+                    <div class="result-value">GCD: ${formatNumber(gcdResult)}</div>
+                    <div class="result-value">LCM: ${formatNumber(lcmResult)}</div>
+                    <div class="result-details">Numbers: ${numbers.map(n => formatNumber(n)).join(', ')}</div>
+                    <div class="result-details">Prime Factorizations:<br>${factorizationText}</div>
+                    <div class="result-details">Verification: GCD × LCM = ${formatNumber(gcdResult * lcmResult)}</div>
+                `;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

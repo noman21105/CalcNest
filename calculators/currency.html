@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Currency Converter</h1>
+            <p class="page-description">Convert between different currencies (offline rates)</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Amount:</label>
+                <input type="number" id="amount" class="input-field" placeholder="Enter amount" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">From Currency:</label>
+                <select id="from-currency" class="select-field">
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="EUR">EUR - Euro</option>
+                    <option value="GBP">GBP - British Pound</option>
+                    <option value="JPY">JPY - Japanese Yen</option>
+                    <option value="CAD">CAD - Canadian Dollar</option>
+                    <option value="AUD">AUD - Australian Dollar</option>
+                    <option value="CHF">CHF - Swiss Franc</option>
+                    <option value="CNY">CNY - Chinese Yuan</option>
+                    <option value="INR">INR - Indian Rupee</option>
+                    <option value="BRL">BRL - Brazilian Real</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">To Currency:</label>
+                <select id="to-currency" class="select-field">
+                    <option value="EUR">EUR - Euro</option>
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="GBP">GBP - British Pound</option>
+                    <option value="JPY">JPY - Japanese Yen</option>
+                    <option value="CAD">CAD - Canadian Dollar</option>
+                    <option value="AUD">AUD - Australian Dollar</option>
+                    <option value="CHF">CHF - Swiss Franc</option>
+                    <option value="CNY">CNY - Chinese Yuan</option>
+                    <option value="INR">INR - Indian Rupee</option>
+                    <option value="BRL">BRL - Brazilian Real</option>
+                </select>
+            </div>
+
+            <button onclick="convertCurrency()" class="calculate-btn">Convert Currency</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Conversion Result</h3>
+            </div>
+
+            <div class="result-section" style="display: block; margin-top: 2rem;">
+                <h3 class="result-title">Exchange Rate Information</h3>
+                <div class="result-details">
+                    <strong>Note:</strong> This calculator uses approximate exchange rates for offline calculation. 
+                    For actual transactions, please check current market rates as they fluctuate constantly.
+                    <br><br>
+                    <strong>Base rates (approximate):</strong><br>
+                    All rates are relative to USD as the base currency.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        // Approximate exchange rates (base: USD = 1.00)
+        // Note: These are static rates for offline calculation only
+        const exchangeRates = {
+            USD: 1.00,      // US Dollar (base)
+            EUR: 0.85,      // Euro
+            GBP: 0.73,      // British Pound
+            JPY: 110.00,    // Japanese Yen
+            CAD: 1.25,      // Canadian Dollar
+            AUD: 1.35,      // Australian Dollar
+            CHF: 0.92,      // Swiss Franc
+            CNY: 6.45,      // Chinese Yuan
+            INR: 74.50,     // Indian Rupee
+            BRL: 5.20       // Brazilian Real
+        };
+        
+        const currencySymbols = {
+            USD: '$',
+            EUR: '€',
+            GBP: '£',
+            JPY: '¥',
+            CAD: 'C$',
+            AUD: 'A$',
+            CHF: 'CHF',
+            CNY: '¥',
+            INR: '₹',
+            BRL: 'R$'
+        };
+
+        function convertCurrency() {
+            try {
+                const amount = validateInput(document.getElementById('amount').value, 0);
+                const fromCurrency = document.getElementById('from-currency').value;
+                const toCurrency = document.getElementById('to-currency').value;
+                
+                if (fromCurrency === toCurrency) {
+                    throw new Error('Please select different currencies for conversion');
+                }
+                
+                // Convert to USD first, then to target currency
+                const amountInUSD = amount / exchangeRates[fromCurrency];
+                const convertedAmount = amountInUSD * exchangeRates[toCurrency];
+                
+                const exchangeRate = exchangeRates[toCurrency] / exchangeRates[fromCurrency];
+                const reverseRate = 1 / exchangeRate;
+                
+                // Calculate common conversion amounts
+                const commonAmounts = [1, 10, 100, 1000];
+                const conversions = commonAmounts.map(amt => {
+                    const converted = (amt / exchangeRates[fromCurrency]) * exchangeRates[toCurrency];
+                    return `${currencySymbols[fromCurrency]}${formatNumber(amt)} = ${currencySymbols[toCurrency]}${formatNumber(Math.round(converted * 100) / 100)}`;
+                });
+                
+                document.getElementById('result').innerHTML = `
+                    <h3 class="result-title">Currency Conversion Result</h3>
+                    <div class="result-value">${currencySymbols[toCurrency]}${formatNumber(Math.round(convertedAmount * 100) / 100)}</div>
+                    <div class="result-details">${currencySymbols[fromCurrency]}${formatNumber(amount)} ${fromCurrency} = ${currencySymbols[toCurrency]}${formatNumber(Math.round(convertedAmount * 100) / 100)} ${toCurrency}</div>
+                    <div class="result-details">Exchange Rate: 1 ${fromCurrency} = ${formatNumber(Math.round(exchangeRate * 10000) / 10000)} ${toCurrency}</div>
+                    <div class="result-details">Reverse Rate: 1 ${toCurrency} = ${formatNumber(Math.round(reverseRate * 10000) / 10000)} ${fromCurrency}</div>
+                    <br><strong>Quick Reference:</strong>
+                    <div class="result-details">${conversions.join('<br>')}</div>
+                    <br><div class="result-details"><em>Rates are approximate and for calculation purposes only. Check current market rates for actual transactions.</em></div>
+                `;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMI Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">EMI Calculator</h1>
+            <p class="page-description">Calculate Equated Monthly Installments for loans</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Loan Amount ($):</label>
+                <input type="number" id="loan-amount" class="input-field" placeholder="Enter loan amount" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Annual Interest Rate (%):</label>
+                <input type="number" id="interest-rate" class="input-field" placeholder="Enter interest rate" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Loan Tenure:</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="number" id="tenure-value" class="input-field" placeholder="Enter tenure" step="1" min="1" style="flex: 2;">
+                    <select id="tenure-unit" class="select-field" style="flex: 1;">
+                        <option value="months">Months</option>
+                        <option value="years">Years</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="calculateEMI()" class="calculate-btn">Calculate EMI</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">EMI Results</h3>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function calculateEMI() {
+            try {
+                const loanAmount = validateInput(document.getElementById('loan-amount').value, 0);
+                const annualRate = validateInput(document.getElementById('interest-rate').value, 0);
+                const tenureValue = validateInput(document.getElementById('tenure-value').value, 1);
+                const tenureUnit = document.getElementById('tenure-unit').value;
+                
+                // Convert tenure to months
+                const tenureMonths = tenureUnit === 'years' ? tenureValue * 12 : tenureValue;
+                
+                // Convert annual rate to monthly rate
+                const monthlyRate = annualRate / (12 * 100);
+                
+                let emi;
+                if (monthlyRate === 0) {
+                    // If interest rate is 0, EMI is simply loan amount divided by tenure
+                    emi = loanAmount / tenureMonths;
+                } else {
+                    // EMI formula: P * r * (1 + r)^n / ((1 + r)^n - 1)
+                    const factor = Math.pow(1 + monthlyRate, tenureMonths);
+                    emi = (loanAmount * monthlyRate * factor) / (factor - 1);
+                }
+                
+                const totalAmount = emi * tenureMonths;
+                const totalInterest = totalAmount - loanAmount;
+                
+                // Create amortization summary
+                const yearlyBreakdown = [];
+                let balance = loanAmount;
+                
+                for (let year = 1; year <= Math.ceil(tenureMonths / 12); year++) {
+                    const startMonth = (year - 1) * 12 + 1;
+                    const endMonth = Math.min(year * 12, tenureMonths);
+                    let yearlyPrincipal = 0;
+                    let yearlyInterest = 0;
+                    
+                    for (let month = startMonth; month <= endMonth; month++) {
+                        const interestPayment = balance * monthlyRate;
+                        const principalPayment = emi - interestPayment;
+                        
+                        yearlyPrincipal += principalPayment;
+                        yearlyInterest += interestPayment;
+                        balance -= principalPayment;
+                    }
+                    
+                    if (endMonth >= startMonth) {
+                        yearlyBreakdown.push({
+                            year: year,
+                            principal: yearlyPrincipal,
+                            interest: yearlyInterest,
+                            balance: Math.max(0, balance)
+                        });
+                    }
+                }
+                
+                let breakdownHtml = '<br><strong>Year-wise Breakdown:</strong><br>';
+                yearlyBreakdown.forEach(year => {
+                    breakdownHtml += `Year ${year.year}: Principal $${formatNumber(Math.round(year.principal * 100) / 100)}, Interest $${formatNumber(Math.round(year.interest * 100) / 100)}, Balance $${formatNumber(Math.round(year.balance * 100) / 100)}<br>`;
+                });
+                
+                document.getElementById('result').innerHTML = `
+                    <h3 class="result-title">EMI Calculation Results</h3>
+                    <div class="result-value">Monthly EMI: $${formatNumber(Math.round(emi * 100) / 100)}</div>
+                    <div class="result-details">Loan Amount: $${formatNumber(loanAmount)}</div>
+                    <div class="result-details">Interest Rate: ${annualRate}% per annum</div>
+                    <div class="result-details">Loan Tenure: ${tenureValue} ${tenureUnit} (${tenureMonths} months)</div>
+                    <div class="result-details">Total Amount Payable: $${formatNumber(Math.round(totalAmount * 100) / 100)}</div>
+                    <div class="result-details">Total Interest Payable: $${formatNumber(Math.round(totalInterest * 100) / 100)}</div>
+                    <div class="result-details">Interest to Principal Ratio: ${Math.round((totalInterest / loanAmount) * 100)}%</div>
+                    <div class="result-details">${breakdownHtml}</div>
+                `;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

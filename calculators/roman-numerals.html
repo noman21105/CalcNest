@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roman Numerals Converter - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Roman Numerals Converter</h1>
+            <p class="page-description">Convert between Arabic numbers and Roman numerals</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Conversion Type:</label>
+                <select id="conversion-type" class="select-field" onchange="toggleInputType()">
+                    <option value="to-roman">Number to Roman</option>
+                    <option value="to-number">Roman to Number</option>
+                </select>
+            </div>
+
+            <div class="input-group" id="number-input">
+                <label class="input-label">Number (1-3999):</label>
+                <input type="number" id="number" class="input-field" placeholder="Enter number" min="1" max="3999" step="1">
+            </div>
+
+            <div class="input-group" id="roman-input" style="display: none;">
+                <label class="input-label">Roman Numeral:</label>
+                <input type="text" id="roman" class="input-field" placeholder="Enter Roman numeral (e.g., MCMXC)" style="text-transform: uppercase;">
+            </div>
+
+            <button onclick="convertRoman()" class="calculate-btn">Convert</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Result</h3>
+            </div>
+
+            <div class="result-section" style="display: block; margin-top: 2rem;">
+                <h3 class="result-title">Roman Numeral Rules</h3>
+                <div class="result-details">
+                    <strong>Basic Symbols:</strong><br>
+                    I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1000<br><br>
+                    <strong>Subtraction Rules:</strong><br>
+                    I before V or X (IV = 4, IX = 9)<br>
+                    X before L or C (XL = 40, XC = 90)<br>
+                    C before D or M (CD = 400, CM = 900)
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        const romanNumerals = [
+            { value: 1000, symbol: 'M' },
+            { value: 900, symbol: 'CM' },
+            { value: 500, symbol: 'D' },
+            { value: 400, symbol: 'CD' },
+            { value: 100, symbol: 'C' },
+            { value: 90, symbol: 'XC' },
+            { value: 50, symbol: 'L' },
+            { value: 40, symbol: 'XL' },
+            { value: 10, symbol: 'X' },
+            { value: 9, symbol: 'IX' },
+            { value: 5, symbol: 'V' },
+            { value: 4, symbol: 'IV' },
+            { value: 1, symbol: 'I' }
+        ];
+        
+        function toggleInputType() {
+            const type = document.getElementById('conversion-type').value;
+            const numberInput = document.getElementById('number-input');
+            const romanInput = document.getElementById('roman-input');
+            
+            if (type === 'to-roman') {
+                numberInput.style.display = 'block';
+                romanInput.style.display = 'none';
+            } else {
+                numberInput.style.display = 'none';
+                romanInput.style.display = 'block';
+            }
+            
+            document.getElementById('result').style.display = 'none';
+        }
+        
+        function numberToRoman(num) {
+            if (num < 1 || num > 3999) {
+                throw new Error('Number must be between 1 and 3999');
+            }
+            
+            let result = '';
+            let remaining = num;
+            
+            for (const { value, symbol } of romanNumerals) {
+                while (remaining >= value) {
+                    result += symbol;
+                    remaining -= value;
+                }
+            }
+            
+            return result;
+        }
+        
+        function romanToNumber(roman) {
+            roman = roman.toUpperCase().trim();
+            
+            if (!/^[IVXLCDM]+$/.test(roman)) {
+                throw new Error('Invalid Roman numeral. Use only I, V, X, L, C, D, M');
+            }
+            
+            let result = 0;
+            let i = 0;
+            
+            for (const { value, symbol } of romanNumerals) {
+                while (roman.substring(i, i + symbol.length) === symbol) {
+                    result += value;
+                    i += symbol.length;
+                }
+            }
+            
+            if (i !== roman.length) {
+                throw new Error('Invalid Roman numeral format');
+            }
+            
+            return result;
+        }
+        
+        function getBreakdown(num) {
+            const breakdown = [];
+            let remaining = num;
+            
+            for (const { value, symbol } of romanNumerals) {
+                const count = Math.floor(remaining / value);
+                if (count > 0) {
+                    breakdown.push(`${count} × ${symbol} (${value}) = ${count * value}`);
+                    remaining -= count * value;
+                }
+            }
+            
+            return breakdown;
+        }
+
+        function convertRoman() {
+            try {
+                const type = document.getElementById('conversion-type').value;
+                let result, details;
+                
+                if (type === 'to-roman') {
+                    const number = parseInt(document.getElementById('number').value);
+                    
+                    if (isNaN(number)) {
+                        throw new Error('Please enter a valid number');
+                    }
+                    
+                    const romanResult = numberToRoman(number);
+                    const breakdown = getBreakdown(number);
+                    
+                    result = romanResult;
+                    details = `${formatNumber(number)} = ${romanResult}<br>Breakdown:<br>${breakdown.join('<br>')}`;
+                    
+                } else {
+                    const romanInput = document.getElementById('roman').value;
+                    
+                    if (!romanInput.trim()) {
+                        throw new Error('Please enter a Roman numeral');
+                    }
+                    
+                    const numberResult = romanToNumber(romanInput);
+                    const verification = numberToRoman(numberResult);
+                    
+                    result = formatNumber(numberResult);
+                    details = `${romanInput.toUpperCase()} = ${formatNumber(numberResult)}<br>Verification: ${formatNumber(numberResult)} = ${verification}`;
+                }
+                
+                document.getElementById('result').innerHTML = `
+                    <h3 class="result-title">Result</h3>
+                    <div class="result-value">${result}</div>
+                    <div class="result-details">${details}</div>
+                `;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+        
+        // Auto-convert on input for Roman numerals
+        document.addEventListener('DOMContentLoaded', function() {
+            const romanInput = document.getElementById('roman');
+            if (romanInput) {
+                romanInput.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

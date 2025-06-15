@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ohm's Law Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Ohm's Law Calculator</h1>
+            <p class="page-description">Calculate Voltage, Current, Resistance, and Power</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Calculate:</label>
+                <select id="calculate-type" class="select-field" onchange="toggleInputs()">
+                    <option value="voltage">Voltage (V)</option>
+                    <option value="current">Current (I)</option>
+                    <option value="resistance">Resistance (R)</option>
+                    <option value="power">Power (P)</option>
+                </select>
+            </div>
+
+            <div id="voltage-inputs" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Current (A):</label>
+                    <input type="number" id="current-for-voltage" class="input-field" placeholder="Enter current in amperes" step="any" min="0">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Resistance (Ω):</label>
+                    <input type="number" id="resistance-for-voltage" class="input-field" placeholder="Enter resistance in ohms" step="any" min="0">
+                </div>
+            </div>
+
+            <div id="current-inputs" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Voltage (V):</label>
+                    <input type="number" id="voltage-for-current" class="input-field" placeholder="Enter voltage in volts" step="any" min="0">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Resistance (Ω):</label>
+                    <input type="number" id="resistance-for-current" class="input-field" placeholder="Enter resistance in ohms" step="any" min="0">
+                </div>
+            </div>
+
+            <div id="resistance-inputs" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Voltage (V):</label>
+                    <input type="number" id="voltage-for-resistance" class="input-field" placeholder="Enter voltage in volts" step="any" min="0">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Current (A):</label>
+                    <input type="number" id="current-for-resistance" class="input-field" placeholder="Enter current in amperes" step="any" min="0">
+                </div>
+            </div>
+
+            <div id="power-inputs">
+                <div class="input-group">
+                    <label class="input-label">Power Calculation Method:</label>
+                    <select id="power-method" class="select-field" onchange="togglePowerInputs()">
+                        <option value="vi">Voltage × Current</option>
+                        <option value="v2r">Voltage² ÷ Resistance</option>
+                        <option value="i2r">Current² × Resistance</option>
+                    </select>
+                </div>
+                <div id="power-vi-inputs">
+                    <div class="input-group">
+                        <label class="input-label">Voltage (V):</label>
+                        <input type="number" id="voltage-for-power" class="input-field" placeholder="Enter voltage in volts" step="any" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Current (A):</label>
+                        <input type="number" id="current-for-power" class="input-field" placeholder="Enter current in amperes" step="any" min="0">
+                    </div>
+                </div>
+                <div id="power-v2r-inputs" style="display: none;">
+                    <div class="input-group">
+                        <label class="input-label">Voltage (V):</label>
+                        <input type="number" id="voltage-for-power-v2r" class="input-field" placeholder="Enter voltage in volts" step="any" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Resistance (Ω):</label>
+                        <input type="number" id="resistance-for-power-v2r" class="input-field" placeholder="Enter resistance in ohms" step="any" min="0">
+                    </div>
+                </div>
+                <div id="power-i2r-inputs" style="display: none;">
+                    <div class="input-group">
+                        <label class="input-label">Current (A):</label>
+                        <input type="number" id="current-for-power-i2r" class="input-field" placeholder="Enter current in amperes" step="any" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Resistance (Ω):</label>
+                        <input type="number" id="resistance-for-power-i2r" class="input-field" placeholder="Enter resistance in ohms" step="any" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="calculateOhmsLaw()" class="calculate-btn">Calculate</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Ohm's Law Results</h3>
+            </div>
+
+            <div class="result-section" style="display: block; margin-top: 2rem;">
+                <h3 class="result-title">Ohm's Law Formulas</h3>
+                <div class="result-details">
+                    <strong>Basic Relationships:</strong><br>
+                    V = I × R (Voltage = Current × Resistance)<br>
+                    I = V ÷ R (Current = Voltage ÷ Resistance)<br>
+                    R = V ÷ I (Resistance = Voltage ÷ Current)<br>
+                    P = V × I (Power = Voltage × Current)<br>
+                    P = V² ÷ R (Power = Voltage² ÷ Resistance)<br>
+                    P = I² × R (Power = Current² × Resistance)
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function toggleInputs() {
+            const calculateType = document.getElementById('calculate-type').value;
+            
+            // Hide all input groups
+            document.getElementById('voltage-inputs').style.display = 'none';
+            document.getElementById('current-inputs').style.display = 'none';
+            document.getElementById('resistance-inputs').style.display = 'none';
+            document.getElementById('power-inputs').style.display = 'none';
+            
+            // Show relevant input group
+            document.getElementById(calculateType + '-inputs').style.display = 'block';
+            
+            // Hide result
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function togglePowerInputs() {
+            const method = document.getElementById('power-method').value;
+            
+            // Hide all power input groups
+            document.getElementById('power-vi-inputs').style.display = 'none';
+            document.getElementById('power-v2r-inputs').style.display = 'none';
+            document.getElementById('power-i2r-inputs').style.display = 'none';
+            
+            // Show relevant input group
+            document.getElementById('power-' + method + '-inputs').style.display = 'block';
+        }
+
+        function calculateOhmsLaw() {
+            try {
+                const calculateType = document.getElementById('calculate-type').value;
+                let result, formula, allValues = {};
+                
+                switch (calculateType) {
+                    case 'voltage':
+                        const current = validateInput(document.getElementById('current-for-voltage').value, 0);
+                        const resistance = validateInput(document.getElementById('resistance-for-voltage').value, 0);
+                        
+                        result = current * resistance;
+                        formula = `V = I × R = ${formatNumber(current)} × ${formatNumber(resistance)}`;
+                        
+                        allValues = {
+                            voltage: result,
+                            current: current,
+                            resistance: resistance,
+                            power: result * current
+                        };
+                        break;
+                        
+                    case 'current':
+                        const voltage1 = validateInput(document.getElementById('voltage-for-current').value, 0);
+                        const resistance1 = validateInput(document.getElementById('resistance-for-current').value, 0.001);
+                        
+                        result = voltage1 / resistance1;
+                        formula = `I = V ÷ R = ${formatNumber(voltage1)} ÷ ${formatNumber(resistance1)}`;
+                        
+                        allValues = {
+                            voltage: voltage1,
+                            current: result,
+                            resistance: resistance1,
+                            power: voltage1 * result
+                        };
+                        break;
+                        
+                    case 'resistance':
+                        const voltage2 = validateInput(document.getElementById('voltage-for-resistance').value, 0);
+                        const current2 = validateInput(document.getElementById('current-for-resistance').value, 0.001);
+                        
+                        result = voltage2 / current2;
+                        formula = `R = V ÷ I = ${formatNumber(voltage2)} ÷ ${formatNumber(current2)}`;
+                        
+                        allValues = {
+                            voltage: voltage2,
+                            current: current2,
+                            resistance: result,
+                            power: voltage2 * current2
+                        };
+                        break;
+                        
+                    case 'power':
+                        const method = document.getElementById('power-method').value;
+                        
+                        switch (method) {
+                            case 'vi':
+                                const voltage3 = validateInput(document.getElementById('voltage-for-power').value, 0);
+                                const current3 = validateInput(document.getElementById('current-for-power').value, 0);
+                                
+                                result = voltage3 * current3;
+                                formula = `P = V × I = ${formatNumber(voltage3)} × ${formatNumber(current3)}`;
+                                
+                                allValues = {
+                                    voltage: voltage3,
+                                    current: current3,
+                                    resistance: voltage3 / current3,
+                                    power: result
+                                };
+                                break;
+                                
+                            case 'v2r':
+                                const voltage4 = validateInput(document.getElementById('voltage-for-power-v2r').value, 0);
+                                const resistance4 = validateInput(document.getElementById('resistance-for-power-v2r').value, 0.001);
+                                
+                                result = (voltage4 * voltage4) / resistance4;
+                                formula = `P = V² ÷ R = ${formatNumber(voltage4)}² ÷ ${formatNumber(resistance4)}`;
+                                
+                                allValues = {
+                                    voltage: voltage4,
+                                    current: voltage4 / resistance4,
+                                    resistance: resistance4,
+                                    power: result
+                                };
+                                break;
+                                
+                            case 'i2r':
+                                const current4 = validateInput(document.getElementById('current-for-power-i2r').value, 0);
+                                const resistance5 = validateInput(document.getElementById('resistance-for-power-i2r').value, 0);
+                                
+                                result = (current4 * current4) * resistance5;
+                                formula = `P = I² × R = ${formatNumber(current4)}² × ${formatNumber(resistance5)}`;
+                                
+                                allValues = {
+                                    voltage: current4 * resistance5,
+                                    current: current4,
+                                    resistance: resistance5,
+                                    power: result
+                                };
+                                break;
+                        }
+                        break;
+                }
+                
+                const units = {
+                    voltage: 'V',
+                    current: 'A',
+                    resistance: 'Ω',
+                    power: 'W'
+                };
+                
+                document.getElementById('result').innerHTML = `
+                    <h3 class="result-title">Ohm's Law Calculation Results</h3>
+                    <div class="result-value">${formatNumber(Math.round(result * 1000000) / 1000000)} ${units[calculateType]}</div>
+                    <div class="result-details">Formula: ${formula}</div>
+                    <br><strong>Complete Circuit Analysis:</strong>
+                    <div class="result-details">Voltage (V): ${formatNumber(Math.round(allValues.voltage * 1000000) / 1000000)} V</div>
+                    <div class="result-details">Current (I): ${formatNumber(Math.round(allValues.current * 1000000) / 1000000)} A</div>
+                    <div class="result-details">Resistance (R): ${formatNumber(Math.round(allValues.resistance * 1000000) / 1000000)} Ω</div>
+                    <div class="result-details">Power (P): ${formatNumber(Math.round(allValues.power * 1000000) / 1000000)} W</div>
+                    <br><strong>Power Dissipation:</strong>
+                    <div class="result-details">Energy per hour: ${formatNumber(Math.round(allValues.power * 3600 * 100) / 100)} J/h</div>
+                    <div class="result-details">Cost per hour (at $0.10/kWh): $${formatNumber(Math.round(allValues.power * 0.0001 * 100) / 100)}</div>
+                `;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+
+        // Initialize display
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleInputs();
+        });
+    </script>
+</body>
+</html>

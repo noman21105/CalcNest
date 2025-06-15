@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Percentage Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Percentage Calculator</h1>
+            <p class="page-description">Calculate percentages, percentage changes, and percentage of values</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Calculation Type:</label>
+                <select id="calculation-type" class="select-field" onchange="toggleInputs()">
+                    <option value="percentage-of">What is X% of Y?</option>
+                    <option value="is-what-percent">X is what percent of Y?</option>
+                    <option value="percent-change">Percentage change from X to Y</option>
+                </select>
+            </div>
+
+            <div id="percentage-of-inputs">
+                <div class="input-group">
+                    <label class="input-label">Percentage (%):</label>
+                    <input type="number" id="percentage" class="input-field" placeholder="Enter percentage" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Value:</label>
+                    <input type="number" id="value" class="input-field" placeholder="Enter value" step="0.01">
+                </div>
+            </div>
+
+            <div id="is-what-percent-inputs" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Part:</label>
+                    <input type="number" id="part" class="input-field" placeholder="Enter part value" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Whole:</label>
+                    <input type="number" id="whole" class="input-field" placeholder="Enter whole value" step="0.01">
+                </div>
+            </div>
+
+            <div id="percent-change-inputs" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Original Value:</label>
+                    <input type="number" id="original" class="input-field" placeholder="Enter original value" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">New Value:</label>
+                    <input type="number" id="new-value" class="input-field" placeholder="Enter new value" step="0.01">
+                </div>
+            </div>
+
+            <button onclick="calculatePercentage()" class="calculate-btn">Calculate</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Result</h3>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function toggleInputs() {
+            const type = document.getElementById('calculation-type').value;
+            
+            // Hide all input groups
+            document.getElementById('percentage-of-inputs').style.display = 'none';
+            document.getElementById('is-what-percent-inputs').style.display = 'none';
+            document.getElementById('percent-change-inputs').style.display = 'none';
+            
+            // Show relevant input group
+            document.getElementById(type + '-inputs').style.display = 'block';
+            
+            // Hide result
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function calculatePercentage() {
+            const type = document.getElementById('calculation-type').value;
+            const resultElement = document.getElementById('result');
+            
+            try {
+                let result, details;
+                
+                switch (type) {
+                    case 'percentage-of':
+                        const percentage = validateInput(document.getElementById('percentage').value);
+                        const value = validateInput(document.getElementById('value').value);
+                        result = (percentage / 100) * value;
+                        details = `${percentage}% of ${formatNumber(value)} = ${formatNumber(result)}`;
+                        break;
+                        
+                    case 'is-what-percent':
+                        const part = validateInput(document.getElementById('part').value);
+                        const whole = validateInput(document.getElementById('whole').value, 0.001);
+                        result = (part / whole) * 100;
+                        details = `${formatNumber(part)} is ${result.toFixed(2)}% of ${formatNumber(whole)}`;
+                        break;
+                        
+                    case 'percent-change':
+                        const original = validateInput(document.getElementById('original').value);
+                        const newValue = validateInput(document.getElementById('new-value').value);
+                        if (original === 0) {
+                            throw new Error('Original value cannot be zero');
+                        }
+                        result = ((newValue - original) / original) * 100;
+                        const change = result >= 0 ? 'increase' : 'decrease';
+                        details = `Change from ${formatNumber(original)} to ${formatNumber(newValue)} is a ${Math.abs(result).toFixed(2)}% ${change}`;
+                        break;
+                }
+                
+                resultElement.innerHTML = `
+                    <h3 class="result-title">Result</h3>
+                    <div class="result-value">${typeof result === 'number' ? formatNumber(Math.round(result * 100) / 100) : result}</div>
+                    <div class="result-details">${details}</div>
+                `;
+                resultElement.style.display = 'block';
+                resultElement.classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                resultElement.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

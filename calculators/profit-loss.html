@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profit/Loss Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Profit/Loss Calculator</h1>
+            <p class="page-description">Calculate profit, loss, and profit margins</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Cost Price ($):</label>
+                <input type="number" id="cost-price" class="input-field" placeholder="Enter cost price" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Selling Price ($):</label>
+                <input type="number" id="selling-price" class="input-field" placeholder="Enter selling price" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Quantity (optional):</label>
+                <input type="number" id="quantity" class="input-field" placeholder="Enter quantity" step="1" min="1" value="1">
+            </div>
+
+            <button onclick="calculateProfitLoss()" class="calculate-btn">Calculate Profit/Loss</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Profit/Loss Results</h3>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function calculateProfitLoss() {
+            try {
+                const costPrice = validateInput(document.getElementById('cost-price').value, 0);
+                const sellingPrice = validateInput(document.getElementById('selling-price').value, 0);
+                const quantity = validateInput(document.getElementById('quantity').value || '1', 1);
+                
+                const totalCostPrice = costPrice * quantity;
+                const totalSellingPrice = sellingPrice * quantity;
+                const difference = totalSellingPrice - totalCostPrice;
+                
+                let status, statusColor, profitLossPercentage;
+                
+                if (difference > 0) {
+                    status = 'PROFIT';
+                    statusColor = '#10b981';
+                    profitLossPercentage = (difference / totalCostPrice) * 100;
+                } else if (difference < 0) {
+                    status = 'LOSS';
+                    statusColor = '#ef4444';
+                    profitLossPercentage = (Math.abs(difference) / totalCostPrice) * 100;
+                } else {
+                    status = 'BREAK-EVEN';
+                    statusColor = '#6b7280';
+                    profitLossPercentage = 0;
+                }
+                
+                // Calculate markup and margin
+                const markup = ((sellingPrice - costPrice) / costPrice) * 100;
+                const margin = ((sellingPrice - costPrice) / sellingPrice) * 100;
+                
+                // Break-even analysis
+                const breakEvenPrice = costPrice;
+                const breakEvenRevenue = totalCostPrice;
+                
+                // ROI calculation
+                const roi = (difference / totalCostPrice) * 100;
+                
+                document.getElementById('result').innerHTML = `
+                    <h3 class="result-title">Profit/Loss Analysis</h3>
+                    <div class="result-value" style="color: ${statusColor};">${status}: $${formatNumber(Math.abs(Math.round(difference * 100) / 100))}</div>
+                    <div class="result-details">Cost Price (per unit): $${formatNumber(costPrice)}</div>
+                    <div class="result-details">Selling Price (per unit): $${formatNumber(sellingPrice)}</div>
+                    <div class="result-details">Quantity: ${formatNumber(quantity)}</div>
+                    <div class="result-details">Total Cost: $${formatNumber(Math.round(totalCostPrice * 100) / 100)}</div>
+                    <div class="result-details">Total Revenue: $${formatNumber(Math.round(totalSellingPrice * 100) / 100)}</div>
+                    <div class="result-details">${status} Percentage: ${Math.round(profitLossPercentage * 100) / 100}%</div>
+                    <div class="result-details">Markup: ${Math.round(markup * 100) / 100}%</div>
+                    <div class="result-details">Profit Margin: ${Math.round(margin * 100) / 100}%</div>
+                    <div class="result-details">ROI: ${Math.round(roi * 100) / 100}%</div>
+                    <br><strong>Break-Even Analysis:</strong>
+                    <div class="result-details">Break-Even Price: $${formatNumber(breakEvenPrice)}</div>
+                    <div class="result-details">Break-Even Revenue: $${formatNumber(breakEvenRevenue)}</div>
+                    <br><strong>Scenarios:</strong>
+                    <div class="result-details">
+                        If selling at 10% markup: $${formatNumber(Math.round(costPrice * 1.1 * 100) / 100)} (Profit: $${formatNumber(Math.round(costPrice * 0.1 * quantity * 100) / 100)})<br>
+                        If selling at 20% markup: $${formatNumber(Math.round(costPrice * 1.2 * 100) / 100)} (Profit: $${formatNumber(Math.round(costPrice * 0.2 * quantity * 100) / 100)})<br>
+                        If selling at 50% markup: $${formatNumber(Math.round(costPrice * 1.5 * 100) / 100)} (Profit: $${formatNumber(Math.round(costPrice * 0.5 * quantity * 100) / 100)})
+                    </div>
+                `;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

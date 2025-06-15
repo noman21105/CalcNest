@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interest Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Interest Calculator</h1>
+            <p class="page-description">Calculate simple and compound interest</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Interest Type:</label>
+                <select id="interest-type" class="select-field" onchange="toggleCompoundFields()">
+                    <option value="simple">Simple Interest</option>
+                    <option value="compound">Compound Interest</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Principal Amount ($):</label>
+                <input type="number" id="principal" class="input-field" placeholder="Enter principal amount" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Annual Interest Rate (%):</label>
+                <input type="number" id="rate" class="input-field" placeholder="Enter interest rate" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Time Period (years):</label>
+                <input type="number" id="time" class="input-field" placeholder="Enter time in years" step="0.01" min="0">
+            </div>
+
+            <div class="input-group" id="compound-fields" style="display: none;">
+                <label class="input-label">Compounding Frequency:</label>
+                <select id="frequency" class="select-field">
+                    <option value="1">Annually</option>
+                    <option value="2">Semi-annually</option>
+                    <option value="4">Quarterly</option>
+                    <option value="12">Monthly</option>
+                    <option value="52">Weekly</option>
+                    <option value="365">Daily</option>
+                </select>
+            </div>
+
+            <button onclick="calculateInterest()" class="calculate-btn">Calculate Interest</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Results</h3>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function toggleCompoundFields() {
+            const type = document.getElementById('interest-type').value;
+            const compoundFields = document.getElementById('compound-fields');
+            
+            if (type === 'compound') {
+                compoundFields.style.display = 'block';
+            } else {
+                compoundFields.style.display = 'none';
+            }
+        }
+        
+        function calculateSimpleInterest(principal, rate, time) {
+            const interest = (principal * rate * time) / 100;
+            const total = principal + interest;
+            
+            return {
+                interest: interest,
+                total: total,
+                formula: `SI = P × R × T / 100 = ${formatNumber(principal)} × ${rate}% × ${time} / 100`
+            };
+        }
+        
+        function calculateCompoundInterest(principal, rate, time, frequency) {
+            const rateDecimal = rate / 100;
+            const amount = principal * Math.pow(1 + rateDecimal / frequency, frequency * time);
+            const interest = amount - principal;
+            
+            return {
+                interest: interest,
+                total: amount,
+                formula: `CI = P(1 + r/n)^(nt) - P`,
+                details: `P = ${formatNumber(principal)}, r = ${rate}%, t = ${time} years, n = ${frequency}`
+            };
+        }
+
+        function calculateInterest() {
+            try {
+                const type = document.getElementById('interest-type').value;
+                const principal = validateInput(document.getElementById('principal').value, 0);
+                const rate = validateInput(document.getElementById('rate').value, 0);
+                const time = validateInput(document.getElementById('time').value, 0);
+                
+                let result;
+                
+                if (type === 'simple') {
+                    result = calculateSimpleInterest(principal, rate, time);
+                } else {
+                    const frequency = parseInt(document.getElementById('frequency').value);
+                    result = calculateCompoundInterest(principal, rate, time, frequency);
+                }
+                
+                const frequencyText = type === 'compound' ? 
+                    document.getElementById('frequency').selectedOptions[0].text : '';
+                
+                document.getElementById('result').innerHTML = `
+                    <h3 class="result-title">${type === 'simple' ? 'Simple' : 'Compound'} Interest Results</h3>
+                    <div class="result-value">Interest Earned: $${formatNumber(Math.round(result.interest * 100) / 100)}</div>
+                    <div class="result-value">Total Amount: $${formatNumber(Math.round(result.total * 100) / 100)}</div>
+                    <div class="result-details">Principal: $${formatNumber(principal)}</div>
+                    <div class="result-details">Interest Rate: ${rate}% per year</div>
+                    <div class="result-details">Time Period: ${time} years</div>
+                    ${type === 'compound' ? `<div class="result-details">Compounding: ${frequencyText}</div>` : ''}
+                    <div class="result-details">Formula: ${result.formula}</div>
+                    ${result.details ? `<div class="result-details">${result.details}</div>` : ''}
+                `;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

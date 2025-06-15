@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discount Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Discount Calculator</h1>
+            <p class="page-description">Calculate discounts, sale prices, and savings</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Original Price ($):</label>
+                <input type="number" id="original-price" class="input-field" placeholder="Enter original price" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Discount:</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="number" id="discount-value" class="input-field" placeholder="Enter discount" step="0.01" min="0" style="flex: 2;">
+                    <select id="discount-type" class="select-field" style="flex: 1;">
+                        <option value="percentage">%</option>
+                        <option value="amount">$</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Tax Rate (% - optional):</label>
+                <input type="number" id="tax-rate" class="input-field" placeholder="Enter tax rate if applicable" step="0.01" min="0">
+            </div>
+
+            <button onclick="calculateDiscount()" class="calculate-btn">Calculate Discount</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Discount Results</h3>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function calculateDiscount() {
+            try {
+                const originalPrice = validateInput(document.getElementById('original-price').value, 0);
+                const discountValue = validateInput(document.getElementById('discount-value').value, 0);
+                const discountType = document.getElementById('discount-type').value;
+                const taxRateInput = document.getElementById('tax-rate').value.trim();
+                
+                let discountAmount;
+                let discountPercentage;
+                
+                if (discountType === 'percentage') {
+                    if (discountValue > 100) {
+                        throw new Error('Discount percentage cannot exceed 100%');
+                    }
+                    discountPercentage = discountValue;
+                    discountAmount = (originalPrice * discountValue) / 100;
+                } else {
+                    if (discountValue > originalPrice) {
+                        throw new Error('Discount amount cannot exceed original price');
+                    }
+                    discountAmount = discountValue;
+                    discountPercentage = (discountValue / originalPrice) * 100;
+                }
+                
+                const salePrice = originalPrice - discountAmount;
+                const savings = discountAmount;
+                
+                let finalPrice = salePrice;
+                let taxAmount = 0;
+                
+                // Calculate tax if provided
+                if (taxRateInput && taxRateInput !== '') {
+                    const taxRate = validateInput(taxRateInput, 0);
+                    taxAmount = (salePrice * taxRate) / 100;
+                    finalPrice = salePrice + taxAmount;
+                }
+                
+                let resultHtml = `
+                    <h3 class="result-title">Discount Calculation Results</h3>
+                    <div class="result-value">Sale Price: $${formatNumber(Math.round(salePrice * 100) / 100)}</div>
+                    <div class="result-details">Original Price: $${formatNumber(originalPrice)}</div>
+                    <div class="result-details">Discount: ${formatNumber(Math.round(discountPercentage * 100) / 100)}% ($${formatNumber(Math.round(discountAmount * 100) / 100)})</div>
+                    <div class="result-details">You Save: $${formatNumber(Math.round(savings * 100) / 100)}</div>
+                `;
+                
+                if (taxAmount > 0) {
+                    resultHtml += `
+                        <div class="result-details">Tax (${taxRateInput}%): $${formatNumber(Math.round(taxAmount * 100) / 100)}</div>
+                        <div class="result-details"><strong>Final Price (including tax): $${formatNumber(Math.round(finalPrice * 100) / 100)}</strong></div>
+                    `;
+                }
+                
+                // Multiple item calculation
+                resultHtml += `
+                    <br><strong>Bulk Purchase Calculator:</strong><br>
+                    <div class="result-details">
+                        2 items: $${formatNumber(Math.round(finalPrice * 2 * 100) / 100)} (save $${formatNumber(Math.round(savings * 2 * 100) / 100)})<br>
+                        5 items: $${formatNumber(Math.round(finalPrice * 5 * 100) / 100)} (save $${formatNumber(Math.round(savings * 5 * 100) / 100)})<br>
+                        10 items: $${formatNumber(Math.round(finalPrice * 10 * 100) / 100)} (save $${formatNumber(Math.round(savings * 10 * 100) / 100)})
+                    </div>
+                `;
+                
+                document.getElementById('result').innerHTML = resultHtml;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

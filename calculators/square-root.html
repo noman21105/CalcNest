@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Square Root Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Square Root Calculator</h1>
+            <p class="page-description">Calculate square roots and nth roots of numbers</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Number:</label>
+                <input type="number" id="number" class="input-field" placeholder="Enter number" step="any" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Root Type:</label>
+                <select id="root-type" class="select-field">
+                    <option value="2">Square Root (√)</option>
+                    <option value="3">Cube Root (∛)</option>
+                    <option value="custom">Custom Root</option>
+                </select>
+            </div>
+
+            <div class="input-group" id="custom-root-group" style="display: none;">
+                <label class="input-label">Root Index (n):</label>
+                <input type="number" id="root-index" class="input-field" placeholder="Enter root index" min="2" step="1">
+            </div>
+
+            <button onclick="calculateRoot()" class="calculate-btn">Calculate</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Result</h3>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        document.getElementById('root-type').addEventListener('change', function() {
+            const customGroup = document.getElementById('custom-root-group');
+            if (this.value === 'custom') {
+                customGroup.style.display = 'block';
+            } else {
+                customGroup.style.display = 'none';
+            }
+        });
+
+        function calculateRoot() {
+            try {
+                const number = validateInput(document.getElementById('number').value, 0);
+                const rootType = document.getElementById('root-type').value;
+                let rootIndex;
+                
+                if (rootType === 'custom') {
+                    rootIndex = validateInput(document.getElementById('root-index').value, 2);
+                } else {
+                    rootIndex = parseInt(rootType);
+                }
+                
+                let result;
+                let rootSymbol;
+                
+                if (rootIndex === 2) {
+                    result = Math.sqrt(number);
+                    rootSymbol = '√';
+                } else if (rootIndex === 3) {
+                    result = Math.cbrt(number);
+                    rootSymbol = '∛';
+                } else {
+                    result = Math.pow(number, 1 / rootIndex);
+                    rootSymbol = `${rootIndex}√`;
+                }
+                
+                const details = `${rootSymbol}${formatNumber(number)} = ${formatNumber(result)}`;
+                
+                document.getElementById('result').innerHTML = `
+                    <h3 class="result-title">Result</h3>
+                    <div class="result-value">${formatNumber(Math.round(result * 1000000) / 1000000)}</div>
+                    <div class="result-details">${details}</div>
+                    <div class="result-details">Decimal places: ${result.toString().split('.')[1]?.length || 0}</div>
+                `;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

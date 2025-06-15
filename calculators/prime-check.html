@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prime Number Checker - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Prime Number Checker</h1>
+            <p class="page-description">Check if a number is prime and find its factors</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Number:</label>
+                <input type="number" id="number" class="input-field" placeholder="Enter number" step="1" min="1">
+            </div>
+
+            <button onclick="checkPrime()" class="calculate-btn">Check Prime</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Result</h3>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function isPrime(n) {
+            if (n < 2) return false;
+            if (n === 2) return true;
+            if (n % 2 === 0) return false;
+            
+            for (let i = 3; i <= Math.sqrt(n); i += 2) {
+                if (n % i === 0) return false;
+            }
+            return true;
+        }
+        
+        function getFactors(n) {
+            const factors = [];
+            for (let i = 1; i <= Math.sqrt(n); i++) {
+                if (n % i === 0) {
+                    factors.push(i);
+                    if (i !== n / i) {
+                        factors.push(n / i);
+                    }
+                }
+            }
+            return factors.sort((a, b) => a - b);
+        }
+        
+        function getPrimeFactors(n) {
+            const factors = [];
+            let d = 2;
+            while (d * d <= n) {
+                while (n % d === 0) {
+                    factors.push(d);
+                    n /= d;
+                }
+                d++;
+            }
+            if (n > 1) factors.push(n);
+            return factors;
+        }
+
+        function checkPrime() {
+            try {
+                const number = parseInt(document.getElementById('number').value);
+                
+                if (isNaN(number) || number < 1) {
+                    throw new Error('Please enter a positive integer');
+                }
+                
+                if (number > 1000000) {
+                    throw new Error('Number too large. Please enter a number less than 1,000,000');
+                }
+                
+                const prime = isPrime(number);
+                const factors = getFactors(number);
+                const primeFactors = getPrimeFactors(number);
+                
+                let resultHtml = `
+                    <h3 class="result-title">Result</h3>
+                    <div class="result-value">${formatNumber(number)} is ${prime ? 'PRIME' : 'NOT PRIME'}</div>
+                `;
+                
+                if (prime) {
+                    resultHtml += `<div class="result-details">A prime number has exactly two factors: 1 and itself</div>`;
+                } else {
+                    resultHtml += `
+                        <div class="result-details">Factors: ${factors.map(f => formatNumber(f)).join(', ')}</div>
+                        <div class="result-details">Prime factorization: ${primeFactors.map(f => formatNumber(f)).join(' × ')}</div>
+                        <div class="result-details">Total factors: ${factors.length}</div>
+                    `;
+                }
+                
+                document.getElementById('result').innerHTML = resultHtml;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

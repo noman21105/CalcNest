@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed/Time Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Speed/Time Calculator</h1>
+            <p class="page-description">Calculate speed, time, and distance relationships</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Calculate:</label>
+                <select id="calculate-type" class="select-field" onchange="toggleInputs()">
+                    <option value="speed">Speed</option>
+                    <option value="time">Time</option>
+                    <option value="distance">Distance</option>
+                </select>
+            </div>
+
+            <div id="speed-inputs" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Distance:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="number" id="distance-for-speed" class="input-field" placeholder="Enter distance" step="any" min="0" style="flex: 2;">
+                        <select id="distance-unit-speed" class="select-field" style="flex: 1;">
+                            <option value="km">km</option>
+                            <option value="m">m</option>
+                            <option value="mi">mi</option>
+                            <option value="ft">ft</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Time:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="number" id="time-for-speed" class="input-field" placeholder="Enter time" step="any" min="0" style="flex: 2;">
+                        <select id="time-unit-speed" class="select-field" style="flex: 1;">
+                            <option value="s">seconds</option>
+                            <option value="min">minutes</option>
+                            <option value="h" selected>hours</option>
+                            <option value="d">days</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="time-inputs" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Distance:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="number" id="distance-for-time" class="input-field" placeholder="Enter distance" step="any" min="0" style="flex: 2;">
+                        <select id="distance-unit-time" class="select-field" style="flex: 1;">
+                            <option value="km">km</option>
+                            <option value="m">m</option>
+                            <option value="mi">mi</option>
+                            <option value="ft">ft</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Speed:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="number" id="speed-for-time" class="input-field" placeholder="Enter speed" step="any" min="0" style="flex: 2;">
+                        <select id="speed-unit-time" class="select-field" style="flex: 1;">
+                            <option value="kmh" selected>km/h</option>
+                            <option value="mph">mph</option>
+                            <option value="ms">m/s</option>
+                            <option value="fts">ft/s</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="distance-inputs">
+                <div class="input-group">
+                    <label class="input-label">Speed:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="number" id="speed-for-distance" class="input-field" placeholder="Enter speed" step="any" min="0" style="flex: 2;">
+                        <select id="speed-unit-distance" class="select-field" style="flex: 1;">
+                            <option value="kmh" selected>km/h</option>
+                            <option value="mph">mph</option>
+                            <option value="ms">m/s</option>
+                            <option value="fts">ft/s</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Time:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="number" id="time-for-distance" class="input-field" placeholder="Enter time" step="any" min="0" style="flex: 2;">
+                        <select id="time-unit-distance" class="select-field" style="flex: 1;">
+                            <option value="s">seconds</option>
+                            <option value="min">minutes</option>
+                            <option value="h" selected>hours</option>
+                            <option value="d">days</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="calculateSpeedTime()" class="calculate-btn">Calculate</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Speed/Time Results</h3>
+            </div>
+
+            <div class="result-section" style="display: block; margin-top: 2rem;">
+                <h3 class="result-title">Speed/Time Formulas</h3>
+                <div class="result-details">
+                    <strong>Basic Formulas:</strong><br>
+                    Speed = Distance ÷ Time<br>
+                    Time = Distance ÷ Speed<br>
+                    Distance = Speed × Time<br><br>
+                    <strong>Common Conversions:</strong><br>
+                    1 km/h = 0.278 m/s = 0.621 mph<br>
+                    1 mph = 1.609 km/h = 0.447 m/s<br>
+                    1 m/s = 3.6 km/h = 2.237 mph
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        const conversionFactors = {
+            distance: {
+                km: 1000,
+                m: 1,
+                mi: 1609.344,
+                ft: 0.3048
+            },
+            time: {
+                s: 1,
+                min: 60,
+                h: 3600,
+                d: 86400
+            },
+            speed: {
+                kmh: 1000/3600,  // km/h to m/s
+                mph: 1609.344/3600,  // mph to m/s
+                ms: 1,  // m/s
+                fts: 0.3048  // ft/s to m/s
+            }
+        };
+
+        function toggleInputs() {
+            const calculateType = document.getElementById('calculate-type').value;
+            
+            // Hide all input sections
+            document.getElementById('speed-inputs').style.display = 'none';
+            document.getElementById('time-inputs').style.display = 'none';
+            document.getElementById('distance-inputs').style.display = 'none';
+            
+            // Show relevant section
+            document.getElementById(calculateType + '-inputs').style.display = 'block';
+            
+            // Hide result
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function convertToBaseUnits(value, unit, type) {
+            return value * conversionFactors[type][unit];
+        }
+
+        function convertFromBaseUnits(value, unit, type) {
+            return value / conversionFactors[type][unit];
+        }
+
+        function formatTime(seconds) {
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            
+            const parts = [];
+            if (days > 0) parts.push(`${days}d`);
+            if (hours > 0) parts.push(`${hours}h`);
+            if (minutes > 0) parts.push(`${minutes}m`);
+            if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+            
+            return parts.join(' ');
+        }
+
+        function getSpeedComparisons(speedMs) {
+            const comparisons = [
+                { name: 'Walking speed', speed: 1.4, unit: 'm/s' },
+                { name: 'Running speed', speed: 5, unit: 'm/s' },
+                { name: 'Cycling speed', speed: 6, unit: 'm/s' },
+                { name: 'Car in city', speed: 50/3.6, unit: 'km/h' },
+                { name: 'Highway speed', speed: 100/3.6, unit: 'km/h' },
+                { name: 'Commercial jet', speed: 250, unit: 'm/s' },
+                { name: 'Sound in air', speed: 343, unit: 'm/s' },
+                { name: 'Light', speed: 299792458, unit: 'm/s' }
+            ];
+            
+            // Find closest comparison
+            let closest = null;
+            let minDiff = Infinity;
+            
+            comparisons.forEach(comp => {
+                const diff = Math.abs(speedMs - comp.speed);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closest = comp;
+                }
+            });
+            
+            return closest;
+        }
+
+        function calculateSpeedTime() {
+            try {
+                const calculateType = document.getElementById('calculate-type').value;
+                let result, resultUnit, formula;
+                
+                switch (calculateType) {
+                    case 'speed':
+                        const distance1 = validateInput(document.getElementById('distance-for-speed').value, 0);
+                        const distanceUnit1 = document.getElementById('distance-unit-speed').value;
+                        const time1 = validateInput(document.getElementById('time-for-speed').value, 0.001);
+                        const timeUnit1 = document.getElementById('time-unit-speed').value;
+                        
+                        // Convert to base units (meters and seconds)
+                        const distanceM = convertToBaseUnits(distance1, distanceUnit1, 'distance');
+                        const timeS = convertToBaseUnits(time1, timeUnit1, 'time');
+                        
+                        const speedMs = distanceM / timeS;
+                        
+                        // Convert to common speed units
+                        const speedKmh = speedMs * 3.6;
+                        const speedMph = speedMs * 2.237;
+                        
+                        const speedComparison = getSpeedComparisons(speedMs);
+                        
+                        formula = `Speed = Distance ÷ Time = ${formatNumber(distance1)} ${distanceUnit1} ÷ ${formatNumber(time1)} ${timeUnit1}`;
+                        
+                        document.getElementById('result').innerHTML = `
+                            <h3 class="result-title">Speed Calculation</h3>
+                            <div class="result-value">${formatNumber(Math.round(speedKmh * 100) / 100)} km/h</div>
+                            <div class="result-details">Formula: ${formula}</div>
+                            <div class="result-details">Speed: ${formatNumber(Math.round(speedMs * 100) / 100)} m/s</div>
+                            <div class="result-details">Speed: ${formatNumber(Math.round(speedMph * 100) / 100)} mph</div>
+                            <div class="result-details">Distance: ${formatNumber(distance1)} ${distanceUnit1}</div>
+                            <div class="result-details">Time: ${formatNumber(time1)} ${timeUnit1}</div>
+                            <br><strong>Speed Comparison:</strong>
+                            <div class="result-details">Similar to: ${speedComparison.name} (${formatNumber(speedComparison.speed)} ${speedComparison.unit})</div>
+                        `;
+                        break;
+                        
+                    case 'time':
+                        const distance2 = validateInput(document.getElementById('distance-for-time').value, 0);
+                        const distanceUnit2 = document.getElementById('distance-unit-time').value;
+                        const speed2 = validateInput(document.getElementById('speed-for-time').value, 0.001);
+                        const speedUnit2 = document.getElementById('speed-unit-time').value;
+                        
+                        // Convert to base units
+                        const distanceM2 = convertToBaseUnits(distance2, distanceUnit2, 'distance');
+                        const speedMs2 = convertToBaseUnits(speed2, speedUnit2, 'speed');
+                        
+                        const timeS2 = distanceM2 / speedMs2;
+                        
+                        formula = `Time = Distance ÷ Speed = ${formatNumber(distance2)} ${distanceUnit2} ÷ ${formatNumber(speed2)} ${speedUnit2}`;
+                        
+                        document.getElementById('result').innerHTML = `
+                            <h3 class="result-title">Time Calculation</h3>
+                            <div class="result-value">${formatTime(timeS2)}</div>
+                            <div class="result-details">Formula: ${formula}</div>
+                            <div class="result-details">Time: ${formatNumber(Math.round(timeS2 * 100) / 100)} seconds</div>
+                            <div class="result-details">Time: ${formatNumber(Math.round(timeS2 / 60 * 100) / 100)} minutes</div>
+                            <div class="result-details">Time: ${formatNumber(Math.round(timeS2 / 3600 * 100) / 100)} hours</div>
+                            <div class="result-details">Distance: ${formatNumber(distance2)} ${distanceUnit2}</div>
+                            <div class="result-details">Speed: ${formatNumber(speed2)} ${speedUnit2}</div>
+                        `;
+                        break;
+                        
+                    case 'distance':
+                        const speed3 = validateInput(document.getElementById('speed-for-distance').value, 0);
+                        const speedUnit3 = document.getElementById('speed-unit-distance').value;
+                        const time3 = validateInput(document.getElementById('time-for-distance').value, 0);
+                        const timeUnit3 = document.getElementById('time-unit-distance').value;
+                        
+                        // Convert to base units
+                        const speedMs3 = convertToBaseUnits(speed3, speedUnit3, 'speed');
+                        const timeS3 = convertToBaseUnits(time3, timeUnit3, 'time');
+                        
+                        const distanceM3 = speedMs3 * timeS3;
+                        
+                        // Convert to various distance units
+                        const distanceKm = distanceM3 / 1000;
+                        const distanceMi = distanceM3 / 1609.344;
+                        const distanceFt = distanceM3 / 0.3048;
+                        
+                        formula = `Distance = Speed × Time = ${formatNumber(speed3)} ${speedUnit3} × ${formatNumber(time3)} ${timeUnit3}`;
+                        
+                        document.getElementById('result').innerHTML = `
+                            <h3 class="result-title">Distance Calculation</h3>
+                            <div class="result-value">${formatNumber(Math.round(distanceKm * 100) / 100)} km</div>
+                            <div class="result-details">Formula: ${formula}</div>
+                            <div class="result-details">Distance: ${formatNumber(Math.round(distanceM3 * 100) / 100)} meters</div>
+                            <div class="result-details">Distance: ${formatNumber(Math.round(distanceMi * 100) / 100)} miles</div>
+                            <div class="result-details">Distance: ${formatNumber(Math.round(distanceFt * 100) / 100)} feet</div>
+                            <div class="result-details">Speed: ${formatNumber(speed3)} ${speedUnit3}</div>
+                            <div class="result-details">Time: ${formatNumber(time3)} ${timeUnit3}</div>
+                        `;
+                        break;
+                }
+                
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+
+        // Initialize display
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleInputs();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resistor Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Resistor Calculator</h1>
+            <p class="page-description">Calculate resistance values and decode color codes</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Calculator Type:</label>
+                <select id="calculator-type" class="select-field" onchange="toggleCalculatorType()">
+                    <option value="color-to-value">Color Code to Value</option>
+                    <option value="value-to-color">Value to Color Code</option>
+                    <option value="series-parallel">Series/Parallel Calculator</option>
+                </select>
+            </div>
+
+            <div id="color-to-value-inputs">
+                <div class="input-group">
+                    <label class="input-label">Number of Bands:</label>
+                    <select id="band-count" class="select-field" onchange="updateColorBands()">
+                        <option value="4">4 Bands</option>
+                        <option value="5">5 Bands</option>
+                    </select>
+                </div>
+                <div id="color-bands">
+                    <!-- Color band selectors will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div id="value-to-color-inputs" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Resistance Value (Ω):</label>
+                    <input type="number" id="resistance-value" class="input-field" placeholder="Enter resistance value" min="0" step="any">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Tolerance (%):</label>
+                    <select id="tolerance-select" class="select-field">
+                        <option value="1">±1% (Brown)</option>
+                        <option value="2">±2% (Red)</option>
+                        <option value="5" selected>±5% (Gold)</option>
+                        <option value="10">±10% (Silver)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="series-parallel-inputs" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Connection Type:</label>
+                    <select id="connection-type" class="select-field">
+                        <option value="series">Series</option>
+                        <option value="parallel">Parallel</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Resistor Values (Ω, comma-separated):</label>
+                    <input type="text" id="resistor-values" class="input-field" placeholder="e.g., 100, 220, 330">
+                </div>
+            </div>
+
+            <button onclick="calculateResistor()" class="calculate-btn">Calculate</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Resistor Results</h3>
+            </div>
+
+            <div class="result-section" style="display: block; margin-top: 2rem;">
+                <h3 class="result-title">Resistor Color Code Chart</h3>
+                <div class="result-details">
+                    <strong>Color Values:</strong><br>
+                    Black: 0, Brown: 1, Red: 2, Orange: 3, Yellow: 4<br>
+                    Green: 5, Blue: 6, Violet: 7, Gray: 8, White: 9<br><br>
+                    <strong>Multipliers:</strong><br>
+                    Black: ×1, Brown: ×10, Red: ×100, Orange: ×1K, Yellow: ×10K<br>
+                    Green: ×100K, Blue: ×1M, Violet: ×10M, Gold: ×0.1, Silver: ×0.01<br><br>
+                    <strong>Tolerance:</strong><br>
+                    Brown: ±1%, Red: ±2%, Gold: ±5%, Silver: ±10%
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        const colorCodes = {
+            'black': { value: 0, multiplier: 1, color: '#000000' },
+            'brown': { value: 1, multiplier: 10, tolerance: 1, color: '#8B4513' },
+            'red': { value: 2, multiplier: 100, tolerance: 2, color: '#FF0000' },
+            'orange': { value: 3, multiplier: 1000, color: '#FFA500' },
+            'yellow': { value: 4, multiplier: 10000, color: '#FFFF00' },
+            'green': { value: 5, multiplier: 100000, color: '#008000' },
+            'blue': { value: 6, multiplier: 1000000, color: '#0000FF' },
+            'violet': { value: 7, multiplier: 10000000, color: '#8B00FF' },
+            'gray': { value: 8, color: '#808080' },
+            'white': { value: 9, color: '#FFFFFF' },
+            'gold': { multiplier: 0.1, tolerance: 5, color: '#FFD700' },
+            'silver': { multiplier: 0.01, tolerance: 10, color: '#C0C0C0' }
+        };
+
+        function toggleCalculatorType() {
+            const type = document.getElementById('calculator-type').value;
+            
+            // Hide all input sections
+            document.getElementById('color-to-value-inputs').style.display = 'none';
+            document.getElementById('value-to-color-inputs').style.display = 'none';
+            document.getElementById('series-parallel-inputs').style.display = 'none';
+            
+            // Show relevant section
+            document.getElementById(type + '-inputs').style.display = 'block';
+            
+            // Initialize color bands if needed
+            if (type === 'color-to-value') {
+                updateColorBands();
+            }
+            
+            // Hide result
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function updateColorBands() {
+            const bandCount = parseInt(document.getElementById('band-count').value);
+            const colorBands = document.getElementById('color-bands');
+            
+            colorBands.innerHTML = '';
+            
+            const bandLabels = {
+                4: ['1st Digit', '2nd Digit', 'Multiplier', 'Tolerance'],
+                5: ['1st Digit', '2nd Digit', '3rd Digit', 'Multiplier', 'Tolerance']
+            };
+            
+            bandLabels[bandCount].forEach((label, index) => {
+                const div = document.createElement('div');
+                div.className = 'input-group';
+                
+                const labelElement = document.createElement('label');
+                labelElement.className = 'input-label';
+                labelElement.textContent = label + ':';
+                
+                const select = document.createElement('select');
+                select.className = 'select-field';
+                select.id = `band-${index}`;
+                
+                // Add color options based on band type
+                if (label.includes('Digit')) {
+                    // Digit bands (0-9)
+                    Object.entries(colorCodes).forEach(([color, data]) => {
+                        if (data.hasOwnProperty('value')) {
+                            const option = document.createElement('option');
+                            option.value = color;
+                            option.textContent = `${color.charAt(0).toUpperCase() + color.slice(1)} (${data.value})`;
+                            select.appendChild(option);
+                        }
+                    });
+                } else if (label === 'Multiplier') {
+                    // Multiplier band
+                    Object.entries(colorCodes).forEach(([color, data]) => {
+                        if (data.hasOwnProperty('multiplier')) {
+                            const option = document.createElement('option');
+                            option.value = color;
+                            option.textContent = `${color.charAt(0).toUpperCase() + color.slice(1)} (×${data.multiplier})`;
+                            select.appendChild(option);
+                        }
+                    });
+                } else if (label === 'Tolerance') {
+                    // Tolerance band
+                    Object.entries(colorCodes).forEach(([color, data]) => {
+                        if (data.hasOwnProperty('tolerance')) {
+                            const option = document.createElement('option');
+                            option.value = color;
+                            option.textContent = `${color.charAt(0).toUpperCase() + color.slice(1)} (±${data.tolerance}%)`;
+                            select.appendChild(option);
+                        }
+                    });
+                }
+                
+                div.appendChild(labelElement);
+                div.appendChild(select);
+                colorBands.appendChild(div);
+            });
+        }
+
+        function valueToColorCode(value, tolerance) {
+            // Find the best representation
+            let bestMatch = null;
+            let minError = Infinity;
+            
+            // Try different multipliers
+            Object.entries(colorCodes).forEach(([color, data]) => {
+                if (data.hasOwnProperty('multiplier')) {
+                    const baseValue = value / data.multiplier;
+                    
+                    // Check if we can represent this with 2 or 3 digits
+                    if (baseValue >= 10 && baseValue < 100) {
+                        // 2 digits
+                        const digit1 = Math.floor(baseValue / 10);
+                        const digit2 = Math.floor(baseValue % 10);
+                        const reconstructed = (digit1 * 10 + digit2) * data.multiplier;
+                        const error = Math.abs(reconstructed - value);
+                        
+                        if (error < minError) {
+                            minError = error;
+                            bestMatch = {
+                                digits: [digit1, digit2],
+                                multiplier: color,
+                                reconstructed: reconstructed,
+                                bands: 4
+                            };
+                        }
+                    } else if (baseValue >= 100 && baseValue < 1000) {
+                        // 3 digits
+                        const digit1 = Math.floor(baseValue / 100);
+                        const digit2 = Math.floor((baseValue % 100) / 10);
+                        const digit3 = Math.floor(baseValue % 10);
+                        const reconstructed = (digit1 * 100 + digit2 * 10 + digit3) * data.multiplier;
+                        const error = Math.abs(reconstructed - value);
+                        
+                        if (error < minError) {
+                            minError = error;
+                            bestMatch = {
+                                digits: [digit1, digit2, digit3],
+                                multiplier: color,
+                                reconstructed: reconstructed,
+                                bands: 5
+                            };
+                        }
+                    }
+                }
+            });
+            
+            return bestMatch;
+        }
+
+        function calculateResistor() {
+            try {
+                const type = document.getElementById('calculator-type').value;
+                let resultHtml = '';
+                
+                switch (type) {
+                    case 'color-to-value':
+                        const bandCount = parseInt(document.getElementById('band-count').value);
+                        const bands = [];
+                        
+                        for (let i = 0; i < bandCount; i++) {
+                            const bandColor = document.getElementById(`band-${i}`).value;
+                            bands.push(bandColor);
+                        }
+                        
+                        let resistance = 0;
+                        let tolerance = 0;
+                        
+                        if (bandCount === 4) {
+                            // 4-band resistor
+                            resistance = (colorCodes[bands[0]].value * 10 + colorCodes[bands[1]].value) * colorCodes[bands[2]].multiplier;
+                            tolerance = colorCodes[bands[3]].tolerance;
+                        } else {
+                            // 5-band resistor
+                            resistance = (colorCodes[bands[0]].value * 100 + colorCodes[bands[1]].value * 10 + colorCodes[bands[2]].value) * colorCodes[bands[3]].multiplier;
+                            tolerance = colorCodes[bands[4]].tolerance;
+                        }
+                        
+                        const minValue = resistance * (1 - tolerance / 100);
+                        const maxValue = resistance * (1 + tolerance / 100);
+                        
+                        resultHtml = `
+                            <h3 class="result-title">Resistor Value</h3>
+                            <div class="result-value">${formatNumber(resistance)} Ω</div>
+                            <div class="result-details">Tolerance: ±${tolerance}%</div>
+                            <div class="result-details">Value Range: ${formatNumber(Math.round(minValue * 100) / 100)} - ${formatNumber(Math.round(maxValue * 100) / 100)} Ω</div>
+                            <div class="result-details">Color Code: ${bands.map(b => b.charAt(0).toUpperCase() + b.slice(1)).join(' - ')}</div>
+                        `;
+                        break;
+                        
+                    case 'value-to-color':
+                        const resistanceValue = validateInput(document.getElementById('resistance-value').value, 0);
+                        const toleranceValue = parseInt(document.getElementById('tolerance-select').value);
+                        
+                        const colorCode = valueToColorCode(resistanceValue, toleranceValue);
+                        
+                        if (!colorCode) {
+                            throw new Error('Cannot represent this value with standard color codes');
+                        }
+                        
+                        const colorNames = colorCode.digits.map(digit => {
+                            return Object.keys(colorCodes).find(color => colorCodes[color].value === digit);
+                        });
+                        
+                        colorNames.push(colorCode.multiplier);
+                        
+                        const toleranceColor = Object.keys(colorCodes).find(color => 
+                            colorCodes[color].tolerance === toleranceValue
+                        );
+                        colorNames.push(toleranceColor);
+                        
+                        resultHtml = `
+                            <h3 class="result-title">Color Code</h3>
+                            <div class="result-value">${colorNames.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' - ')}</div>
+                            <div class="result-details">Requested: ${formatNumber(resistanceValue)} Ω</div>
+                            <div class="result-details">Actual: ${formatNumber(colorCode.reconstructed)} Ω</div>
+                            <div class="result-details">Bands: ${colorCode.bands}</div>
+                            <div class="result-details">Tolerance: ±${toleranceValue}%</div>
+                        `;
+                        break;
+                        
+                    case 'series-parallel':
+                        const connectionType = document.getElementById('connection-type').value;
+                        const resistorInput = document.getElementById('resistor-values').value.trim();
+                        
+                        if (!resistorInput) {
+                            throw new Error('Please enter resistor values');
+                        }
+                        
+                        const resistorValues = resistorInput.split(',').map(r => {
+                            const value = parseFloat(r.trim());
+                            if (isNaN(value) || value <= 0) {
+                                throw new Error(`"${r.trim()}" is not a valid resistor value`);
+                            }
+                            return value;
+                        });
+                        
+                        let totalResistance;
+                        
+                        if (connectionType === 'series') {
+                            totalResistance = resistorValues.reduce((sum, r) => sum + r, 0);
+                        } else {
+                            totalResistance = 1 / resistorValues.reduce((sum, r) => sum + 1/r, 0);
+                        }
+                        
+                        // Calculate power ratings and current distribution
+                        const voltage = 12; // Example voltage for calculations
+                        const totalCurrent = voltage / totalResistance;
+                        
+                        let powerCalculations = '';
+                        if (connectionType === 'series') {
+                            powerCalculations = resistorValues.map((r, i) => {
+                                const power = totalCurrent * totalCurrent * r;
+                                const voltageAcross = totalCurrent * r;
+                                return `R${i+1} (${formatNumber(r)}Ω): ${formatNumber(Math.round(voltageAcross * 100) / 100)}V, ${formatNumber(Math.round(power * 1000) / 1000)}W`;
+                            }).join('<br>');
+                        } else {
+                            powerCalculations = resistorValues.map((r, i) => {
+                                const current = voltage / r;
+                                const power = voltage * current;
+                                return `R${i+1} (${formatNumber(r)}Ω): ${formatNumber(Math.round(current * 1000) / 1000)}A, ${formatNumber(Math.round(power * 1000) / 1000)}W`;
+                            }).join('<br>');
+                        }
+                        
+                        resultHtml = `
+                            <h3 class="result-title">${connectionType.charAt(0).toUpperCase() + connectionType.slice(1)} Connection</h3>
+                            <div class="result-value">${formatNumber(Math.round(totalResistance * 1000) / 1000)} Ω</div>
+                            <div class="result-details">Resistors: ${resistorValues.map(r => formatNumber(r) + 'Ω').join(', ')}</div>
+                            <div class="result-details">Connection: ${connectionType.charAt(0).toUpperCase() + connectionType.slice(1)}</div>
+                            <br><strong>At ${voltage}V:</strong>
+                            <div class="result-details">Total Current: ${formatNumber(Math.round(totalCurrent * 1000) / 1000)} A</div>
+                            <div class="result-details">Total Power: ${formatNumber(Math.round(voltage * totalCurrent * 1000) / 1000)} W</div>
+                            <br><strong>Individual Components:</strong>
+                            <div class="result-details">${powerCalculations}</div>
+                        `;
+                        break;
+                }
+                
+                document.getElementById('result').innerHTML = resultHtml;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+
+        // Initialize display
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleCalculatorType();
+        });
+    </script>
+</body>
+</html>

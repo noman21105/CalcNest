@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">BMI Calculator</h1>
+            <p class="page-description">Calculate Body Mass Index and health recommendations</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Unit System:</label>
+                <select id="unit-system" class="select-field" onchange="toggleUnits()">
+                    <option value="metric">Metric (kg, cm)</option>
+                    <option value="imperial">Imperial (lbs, ft/in)</option>
+                </select>
+            </div>
+
+            <div id="metric-inputs">
+                <div class="input-group">
+                    <label class="input-label">Weight (kg):</label>
+                    <input type="number" id="weight-kg" class="input-field" placeholder="Enter weight in kilograms" step="0.1" min="0">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Height (cm):</label>
+                    <input type="number" id="height-cm" class="input-field" placeholder="Enter height in centimeters" step="0.1" min="0">
+                </div>
+            </div>
+
+            <div id="imperial-inputs" style="display: none;">
+                <div class="input-group">
+                    <label class="input-label">Weight (lbs):</label>
+                    <input type="number" id="weight-lbs" class="input-field" placeholder="Enter weight in pounds" step="0.1" min="0">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Height:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="number" id="height-ft" class="input-field" placeholder="Feet" step="1" min="0" style="flex: 1;">
+                        <input type="number" id="height-in" class="input-field" placeholder="Inches" step="0.1" min="0" max="11.9" style="flex: 1;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Age (optional):</label>
+                <input type="number" id="age" class="input-field" placeholder="Enter age" step="1" min="1" max="120">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Gender (optional):</label>
+                <select id="gender" class="select-field">
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+
+            <button onclick="calculateBMI()" class="calculate-btn">Calculate BMI</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">BMI Results</h3>
+            </div>
+
+            <div class="result-section" style="display: block; margin-top: 2rem;">
+                <h3 class="result-title">BMI Categories</h3>
+                <div class="result-details">
+                    <strong>BMI Categories (WHO Standards):</strong><br>
+                    Underweight: BMI < 18.5<br>
+                    Normal weight: BMI 18.5 - 24.9<br>
+                    Overweight: BMI 25.0 - 29.9<br>
+                    Obese Class I: BMI 30.0 - 34.9<br>
+                    Obese Class II: BMI 35.0 - 39.9<br>
+                    Obese Class III: BMI ≥ 40.0<br><br>
+                    <strong>Note:</strong> BMI is a screening tool and not a diagnostic tool. 
+                    Consult healthcare professionals for proper assessment.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function toggleUnits() {
+            const unitSystem = document.getElementById('unit-system').value;
+            const metricInputs = document.getElementById('metric-inputs');
+            const imperialInputs = document.getElementById('imperial-inputs');
+            
+            if (unitSystem === 'metric') {
+                metricInputs.style.display = 'block';
+                imperialInputs.style.display = 'none';
+            } else {
+                metricInputs.style.display = 'none';
+                imperialInputs.style.display = 'block';
+            }
+            
+            // Hide result when changing units
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function getBMICategory(bmi) {
+            if (bmi < 18.5) {
+                return {
+                    category: 'Underweight',
+                    color: '#3b82f6',
+                    description: 'Below normal weight',
+                    advice: 'Consider consulting a healthcare provider for guidance on healthy weight gain.'
+                };
+            } else if (bmi < 25) {
+                return {
+                    category: 'Normal weight',
+                    color: '#10b981',
+                    description: 'Healthy weight range',
+                    advice: 'Maintain your current weight through balanced diet and regular exercise.'
+                };
+            } else if (bmi < 30) {
+                return {
+                    category: 'Overweight',
+                    color: '#f59e0b',
+                    description: 'Above normal weight',
+                    advice: 'Consider lifestyle changes including diet modification and increased physical activity.'
+                };
+            } else if (bmi < 35) {
+                return {
+                    category: 'Obese Class I',
+                    color: '#ef4444',
+                    description: 'Moderately obese',
+                    advice: 'Consult healthcare provider for weight management strategies and health monitoring.'
+                };
+            } else if (bmi < 40) {
+                return {
+                    category: 'Obese Class II',
+                    color: '#dc2626',
+                    description: 'Severely obese',
+                    advice: 'Seek medical supervision for comprehensive weight management program.'
+                };
+            } else {
+                return {
+                    category: 'Obese Class III',
+                    color: '#991b1b',
+                    description: 'Very severely obese',
+                    advice: 'Immediate medical consultation recommended for health assessment and treatment options.'
+                };
+            }
+        }
+
+        function getIdealWeightRange(heightCm) {
+            // Using BMI range 18.5 - 24.9 for ideal weight
+            const heightM = heightCm / 100;
+            const minWeight = 18.5 * heightM * heightM;
+            const maxWeight = 24.9 * heightM * heightM;
+            
+            return { min: minWeight, max: maxWeight };
+        }
+
+        function calculateCalorieNeeds(weight, height, age, gender) {
+            if (!age || !gender) return null;
+            
+            // Mifflin-St Jeor Equation
+            let bmr;
+            if (gender === 'male') {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+            
+            return {
+                sedentary: bmr * 1.2,
+                lightlyActive: bmr * 1.375,
+                moderatelyActive: bmr * 1.55,
+                veryActive: bmr * 1.725,
+                extraActive: bmr * 1.9
+            };
+        }
+
+        function calculateBMI() {
+            try {
+                const unitSystem = document.getElementById('unit-system').value;
+                let weightKg, heightCm;
+                
+                if (unitSystem === 'metric') {
+                    weightKg = validateInput(document.getElementById('weight-kg').value, 0);
+                    heightCm = validateInput(document.getElementById('height-cm').value, 0);
+                } else {
+                    const weightLbs = validateInput(document.getElementById('weight-lbs').value, 0);
+                    const heightFt = validateInput(document.getElementById('height-ft').value, 0);
+                    const heightIn = parseFloat(document.getElementById('height-in').value) || 0;
+                    
+                    // Convert to metric
+                    weightKg = weightLbs * 0.453592;
+                    heightCm = (heightFt * 12 + heightIn) * 2.54;
+                }
+                
+                if (heightCm < 50 || heightCm > 300) {
+                    throw new Error('Height must be between 50 and 300 cm');
+                }
+                
+                if (weightKg < 10 || weightKg > 1000) {
+                    throw new Error('Weight must be between 10 and 1000 kg');
+                }
+                
+                // Calculate BMI
+                const heightM = heightCm / 100;
+                const bmi = weightKg / (heightM * heightM);
+                
+                const category = getBMICategory(bmi);
+                const idealWeight = getIdealWeightRange(heightCm);
+                
+                // Optional calculations
+                const age = parseInt(document.getElementById('age').value) || null;
+                const gender = document.getElementById('gender').value || null;
+                const calories = calculateCalorieNeeds(weightKg, heightCm, age, gender);
+                
+                let resultHtml = `
+                    <h3 class="result-title">BMI Calculation Results</h3>
+                    <div class="result-value" style="color: ${category.color};">BMI: ${formatNumber(Math.round(bmi * 10) / 10)}</div>
+                    <div class="result-details">Category: <strong>${category.category}</strong></div>
+                    <div class="result-details">${category.description}</div>
+                    <div class="result-details">Weight: ${formatNumber(Math.round(weightKg * 10) / 10)} kg (${formatNumber(Math.round(weightKg * 2.20462 * 10) / 10)} lbs)</div>
+                    <div class="result-details">Height: ${formatNumber(Math.round(heightCm * 10) / 10)} cm (${Math.floor(heightCm / 2.54 / 12)}' ${Math.round((heightCm / 2.54) % 12 * 10) / 10}")</div>
+                    <br><strong>Health Recommendations:</strong>
+                    <div class="result-details">${category.advice}</div>
+                    <br><strong>Ideal Weight Range:</strong>
+                    <div class="result-details">${formatNumber(Math.round(idealWeight.min * 10) / 10)} - ${formatNumber(Math.round(idealWeight.max * 10) / 10)} kg</div>
+                    <div class="result-details">${formatNumber(Math.round(idealWeight.min * 2.20462 * 10) / 10)} - ${formatNumber(Math.round(idealWeight.max * 2.20462 * 10) / 10)} lbs</div>
+                `;
+                
+                if (calories) {
+                    resultHtml += `
+                        <br><strong>Daily Calorie Needs (estimated):</strong>
+                        <div class="result-details">Sedentary: ${formatNumber(Math.round(calories.sedentary))} calories</div>
+                        <div class="result-details">Lightly Active: ${formatNumber(Math.round(calories.lightlyActive))} calories</div>
+                        <div class="result-details">Moderately Active: ${formatNumber(Math.round(calories.moderatelyActive))} calories</div>
+                        <div class="result-details">Very Active: ${formatNumber(Math.round(calories.veryActive))} calories</div>
+                        <div class="result-details">Extra Active: ${formatNumber(Math.round(calories.extraActive))} calories</div>
+                    `;
+                }
+                
+                // Weight change recommendations
+                if (bmi < 18.5) {
+                    const targetWeight = 20 * heightM * heightM; // Target BMI of 20
+                    const weightToGain = targetWeight - weightKg;
+                    resultHtml += `
+                        <br><strong>Weight Gain Recommendation:</strong>
+                        <div class="result-details">Target weight gain: ${formatNumber(Math.round(weightToGain * 10) / 10)} kg (${formatNumber(Math.round(weightToGain * 2.20462 * 10) / 10)} lbs)</div>
+                    `;
+                } else if (bmi > 25) {
+                    const targetWeight = 22 * heightM * heightM; // Target BMI of 22
+                    const weightToLose = weightKg - targetWeight;
+                    resultHtml += `
+                        <br><strong>Weight Loss Recommendation:</strong>
+                        <div class="result-details">Target weight loss: ${formatNumber(Math.round(weightToLose * 10) / 10)} kg (${formatNumber(Math.round(weightToLose * 2.20462 * 10) / 10)} lbs)</div>
+                    `;
+                }
+                
+                document.getElementById('result').innerHTML = resultHtml;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

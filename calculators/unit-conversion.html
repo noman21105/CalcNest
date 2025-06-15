@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Conversion Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Unit Conversion Calculator</h1>
+            <p class="page-description">Convert between different units of measurement</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Category:</label>
+                <select id="category" class="select-field" onchange="updateUnits()">
+                    <option value="length">Length</option>
+                    <option value="mass">Mass/Weight</option>
+                    <option value="temperature">Temperature</option>
+                    <option value="area">Area</option>
+                    <option value="volume">Volume</option>
+                    <option value="speed">Speed</option>
+                    <option value="energy">Energy</option>
+                    <option value="pressure">Pressure</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Value:</label>
+                <input type="number" id="value" class="input-field" placeholder="Enter value" step="any">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">From Unit:</label>
+                <select id="from-unit" class="select-field"></select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">To Unit:</label>
+                <select id="to-unit" class="select-field"></select>
+            </div>
+
+            <button onclick="convertUnits()" class="calculate-btn">Convert</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Conversion Result</h3>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        const unitData = {
+            length: {
+                name: 'Length',
+                units: {
+                    mm: { name: 'Millimeter', factor: 0.001, symbol: 'mm' },
+                    cm: { name: 'Centimeter', factor: 0.01, symbol: 'cm' },
+                    m: { name: 'Meter', factor: 1, symbol: 'm' },
+                    km: { name: 'Kilometer', factor: 1000, symbol: 'km' },
+                    in: { name: 'Inch', factor: 0.0254, symbol: 'in' },
+                    ft: { name: 'Foot', factor: 0.3048, symbol: 'ft' },
+                    yd: { name: 'Yard', factor: 0.9144, symbol: 'yd' },
+                    mi: { name: 'Mile', factor: 1609.344, symbol: 'mi' }
+                }
+            },
+            mass: {
+                name: 'Mass/Weight',
+                units: {
+                    mg: { name: 'Milligram', factor: 0.000001, symbol: 'mg' },
+                    g: { name: 'Gram', factor: 0.001, symbol: 'g' },
+                    kg: { name: 'Kilogram', factor: 1, symbol: 'kg' },
+                    oz: { name: 'Ounce', factor: 0.0283495, symbol: 'oz' },
+                    lb: { name: 'Pound', factor: 0.453592, symbol: 'lb' },
+                    ton: { name: 'Metric Ton', factor: 1000, symbol: 't' }
+                }
+            },
+            temperature: {
+                name: 'Temperature',
+                units: {
+                    c: { name: 'Celsius', symbol: '°C' },
+                    f: { name: 'Fahrenheit', symbol: '°F' },
+                    k: { name: 'Kelvin', symbol: 'K' },
+                    r: { name: 'Rankine', symbol: '°R' }
+                }
+            },
+            area: {
+                name: 'Area',
+                units: {
+                    mm2: { name: 'Square Millimeter', factor: 0.000001, symbol: 'mm²' },
+                    cm2: { name: 'Square Centimeter', factor: 0.0001, symbol: 'cm²' },
+                    m2: { name: 'Square Meter', factor: 1, symbol: 'm²' },
+                    km2: { name: 'Square Kilometer', factor: 1000000, symbol: 'km²' },
+                    in2: { name: 'Square Inch', factor: 0.00064516, symbol: 'in²' },
+                    ft2: { name: 'Square Foot', factor: 0.092903, symbol: 'ft²' },
+                    yd2: { name: 'Square Yard', factor: 0.836127, symbol: 'yd²' },
+                    acre: { name: 'Acre', factor: 4046.86, symbol: 'acre' }
+                }
+            },
+            volume: {
+                name: 'Volume',
+                units: {
+                    ml: { name: 'Milliliter', factor: 0.001, symbol: 'ml' },
+                    l: { name: 'Liter', factor: 1, symbol: 'l' },
+                    m3: { name: 'Cubic Meter', factor: 1000, symbol: 'm³' },
+                    in3: { name: 'Cubic Inch', factor: 0.0163871, symbol: 'in³' },
+                    ft3: { name: 'Cubic Foot', factor: 28.3168, symbol: 'ft³' },
+                    gal: { name: 'Gallon (US)', factor: 3.78541, symbol: 'gal' },
+                    qt: { name: 'Quart (US)', factor: 0.946353, symbol: 'qt' },
+                    pt: { name: 'Pint (US)', factor: 0.473176, symbol: 'pt' }
+                }
+            },
+            speed: {
+                name: 'Speed',
+                units: {
+                    ms: { name: 'Meter per Second', factor: 1, symbol: 'm/s' },
+                    kmh: { name: 'Kilometer per Hour', factor: 0.277778, symbol: 'km/h' },
+                    mph: { name: 'Mile per Hour', factor: 0.44704, symbol: 'mph' },
+                    fts: { name: 'Foot per Second', factor: 0.3048, symbol: 'ft/s' },
+                    knot: { name: 'Knot', factor: 0.514444, symbol: 'knot' }
+                }
+            },
+            energy: {
+                name: 'Energy',
+                units: {
+                    j: { name: 'Joule', factor: 1, symbol: 'J' },
+                    kj: { name: 'Kilojoule', factor: 1000, symbol: 'kJ' },
+                    cal: { name: 'Calorie', factor: 4.184, symbol: 'cal' },
+                    kcal: { name: 'Kilocalorie', factor: 4184, symbol: 'kcal' },
+                    wh: { name: 'Watt-hour', factor: 3600, symbol: 'Wh' },
+                    kwh: { name: 'Kilowatt-hour', factor: 3600000, symbol: 'kWh' },
+                    btu: { name: 'British Thermal Unit', factor: 1055.06, symbol: 'BTU' }
+                }
+            },
+            pressure: {
+                name: 'Pressure',
+                units: {
+                    pa: { name: 'Pascal', factor: 1, symbol: 'Pa' },
+                    kpa: { name: 'Kilopascal', factor: 1000, symbol: 'kPa' },
+                    bar: { name: 'Bar', factor: 100000, symbol: 'bar' },
+                    atm: { name: 'Atmosphere', factor: 101325, symbol: 'atm' },
+                    psi: { name: 'Pounds per Square Inch', factor: 6894.76, symbol: 'psi' },
+                    mmhg: { name: 'Millimeter of Mercury', factor: 133.322, symbol: 'mmHg' }
+                }
+            }
+        };
+
+        function updateUnits() {
+            const category = document.getElementById('category').value;
+            const fromUnit = document.getElementById('from-unit');
+            const toUnit = document.getElementById('to-unit');
+            
+            // Clear existing options
+            fromUnit.innerHTML = '';
+            toUnit.innerHTML = '';
+            
+            // Add new options
+            Object.entries(unitData[category].units).forEach(([key, unit]) => {
+                const option1 = new Option(unit.name, key);
+                const option2 = new Option(unit.name, key);
+                fromUnit.add(option1);
+                toUnit.add(option2);
+            });
+            
+            // Set different default selections
+            if (toUnit.options.length > 1) {
+                toUnit.selectedIndex = 1;
+            }
+            
+            // Hide result
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function convertTemperature(value, fromUnit, toUnit) {
+            // Convert to Celsius first
+            let celsius;
+            switch (fromUnit) {
+                case 'c': celsius = value; break;
+                case 'f': celsius = (value - 32) * 5/9; break;
+                case 'k': celsius = value - 273.15; break;
+                case 'r': celsius = (value - 491.67) * 5/9; break;
+            }
+            
+            // Convert from Celsius to target
+            switch (toUnit) {
+                case 'c': return celsius;
+                case 'f': return celsius * 9/5 + 32;
+                case 'k': return celsius + 273.15;
+                case 'r': return celsius * 9/5 + 491.67;
+            }
+        }
+
+        function convertUnits() {
+            try {
+                const value = validateInput(document.getElementById('value').value);
+                const category = document.getElementById('category').value;
+                const fromUnit = document.getElementById('from-unit').value;
+                const toUnit = document.getElementById('to-unit').value;
+                
+                if (fromUnit === toUnit) {
+                    throw new Error('Please select different units for conversion');
+                }
+                
+                let result;
+                
+                if (category === 'temperature') {
+                    result = convertTemperature(value, fromUnit, toUnit);
+                } else {
+                    // Standard unit conversion using factors
+                    const fromFactor = unitData[category].units[fromUnit].factor;
+                    const toFactor = unitData[category].units[toUnit].factor;
+                    result = value * fromFactor / toFactor;
+                }
+                
+                const fromUnitData = unitData[category].units[fromUnit];
+                const toUnitData = unitData[category].units[toUnit];
+                
+                // Calculate some common conversions for reference
+                const commonValues = [1, 10, 100];
+                const commonConversions = commonValues.map(val => {
+                    let converted;
+                    if (category === 'temperature') {
+                        converted = convertTemperature(val, fromUnit, toUnit);
+                    } else {
+                        converted = val * fromUnitData.factor / toUnitData.factor;
+                    }
+                    return `${formatNumber(val)} ${fromUnitData.symbol} = ${formatNumber(Math.round(converted * 1000000) / 1000000)} ${toUnitData.symbol}`;
+                });
+                
+                document.getElementById('result').innerHTML = `
+                    <h3 class="result-title">${unitData[category].name} Conversion</h3>
+                    <div class="result-value">${formatNumber(Math.round(result * 1000000) / 1000000)} ${toUnitData.symbol}</div>
+                    <div class="result-details">${formatNumber(value)} ${fromUnitData.symbol} = ${formatNumber(Math.round(result * 1000000) / 1000000)} ${toUnitData.symbol}</div>
+                    <div class="result-details">From: ${fromUnitData.name}</div>
+                    <div class="result-details">To: ${toUnitData.name}</div>
+                    <br><strong>Quick Reference:</strong>
+                    <div class="result-details">${commonConversions.join('<br>')}</div>
+                `;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+
+        // Initialize units when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUnits();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalcNest - Comprehensive Calculator Suite</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Default Mobile-Style Calculator -->
+        <section class="calculator-section">
+            <div class="calculator-card">
+                <div class="calculator-display">
+                    <div class="expression" id="expression">0</div>
+                    <div class="result" id="result"></div>
+                </div>
+                <div class="calculator-buttons">
+                    <button class="btn btn-secondary" onclick="clearAll()">AC</button>
+                    <button class="btn btn-secondary" onclick="clearEntry()">C</button>
+                    <button class="btn btn-secondary" onclick="backspace()">⌫</button>
+                    <button class="btn btn-operator" onclick="inputOperator('÷')">÷</button>
+                    
+                    <button class="btn btn-number" onclick="inputNumber('7')">7</button>
+                    <button class="btn btn-number" onclick="inputNumber('8')">8</button>
+                    <button class="btn btn-number" onclick="inputNumber('9')">9</button>
+                    <button class="btn btn-operator" onclick="inputOperator('×')">×</button>
+                    
+                    <button class="btn btn-number" onclick="inputNumber('4')">4</button>
+                    <button class="btn btn-number" onclick="inputNumber('5')">5</button>
+                    <button class="btn btn-number" onclick="inputNumber('6')">6</button>
+                    <button class="btn btn-operator" onclick="inputOperator('-')">-</button>
+                    
+                    <button class="btn btn-number" onclick="inputNumber('1')">1</button>
+                    <button class="btn btn-number" onclick="inputNumber('2')">2</button>
+                    <button class="btn btn-number" onclick="inputNumber('3')">3</button>
+                    <button class="btn btn-operator" onclick="inputOperator('+')">+</button>
+                    
+                    <button class="btn btn-number btn-zero" onclick="inputNumber('0')">0</button>
+                    <button class="btn btn-number" onclick="inputDecimal()">.</button>
+                    <button class="btn btn-equals" onclick="calculate()">=</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculator Categories -->
+        <section class="categories-section">
+            <div class="category-card">
+                <div class="category-header" onclick="toggleCategory('math-numbers')">
+                    <h2>🔢 Math & Numbers</h2>
+                    <span class="toggle-icon" id="math-numbers-icon">▼</span>
+                </div>
+                <div class="category-content" id="math-numbers-content">
+                    <div class="calculator-grid">
+                        <a href="calculators/percentage.html" class="calculator-link">Percentage</a>
+                        <a href="calculators/square-root.html" class="calculator-link">Square Root</a>
+                        <a href="calculators/modulo.html" class="calculator-link">Modulo</a>
+                        <a href="calculators/prime-check.html" class="calculator-link">Prime Check</a>
+                        <a href="calculators/average.html" class="calculator-link">Average</a>
+                        <a href="calculators/gcd-lcm.html" class="calculator-link">GCD/LCM</a>
+                        <a href="calculators/roman-numerals.html" class="calculator-link">Roman Numerals</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header" onclick="toggleCategory('finance-business')">
+                    <h2>💼 Finance & Business</h2>
+                    <span class="toggle-icon" id="finance-business-icon">▼</span>
+                </div>
+                <div class="category-content" id="finance-business-content">
+                    <div class="calculator-grid">
+                        <a href="calculators/interest.html" class="calculator-link">Interest Calculator</a>
+                        <a href="calculators/emi.html" class="calculator-link">EMI Calculator</a>
+                        <a href="calculators/discount.html" class="calculator-link">Discount</a>
+                        <a href="calculators/profit-loss.html" class="calculator-link">Profit/Loss</a>
+                        <a href="calculators/currency.html" class="calculator-link">Currency Conversion</a>
+                        <a href="calculators/tax.html" class="calculator-link">Tax Calculator</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header" onclick="toggleCategory('engineering-conversions')">
+                    <h2>⚙️ Engineering & Conversions</h2>
+                    <span class="toggle-icon" id="engineering-conversions-icon">▼</span>
+                </div>
+                <div class="category-content" id="engineering-conversions-content">
+                    <div class="calculator-grid">
+                        <a href="calculators/unit-conversion.html" class="calculator-link">Unit Conversion</a>
+                        <a href="calculators/ohms-law.html" class="calculator-link">Ohm's Law</a>
+                        <a href="calculators/resistor.html" class="calculator-link">Resistor Calculator</a>
+                        <a href="calculators/binary-decimal.html" class="calculator-link">Binary/Decimal</a>
+                        <a href="calculators/speed-time.html" class="calculator-link">Speed/Time</a>
+                        <a href="calculators/bmi.html" class="calculator-link">BMI Calculator</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

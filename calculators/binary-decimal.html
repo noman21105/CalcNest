@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary/Decimal Converter - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Binary/Decimal Converter</h1>
+            <p class="page-description">Convert between binary, decimal, octal, and hexadecimal number systems</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Input Number System:</label>
+                <select id="input-base" class="select-field" onchange="updateInputPlaceholder()">
+                    <option value="10">Decimal (Base 10)</option>
+                    <option value="2">Binary (Base 2)</option>
+                    <option value="8">Octal (Base 8)</option>
+                    <option value="16">Hexadecimal (Base 16)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Input Value:</label>
+                <input type="text" id="input-value" class="input-field" placeholder="Enter decimal number">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Convert to:</label>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="to-decimal" checked> Decimal
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="to-binary" checked> Binary
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="to-octal" checked> Octal
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="to-hex" checked> Hexadecimal
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="convertNumber()" class="calculate-btn">Convert</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Conversion Results</h3>
+            </div>
+
+            <div class="result-section" style="display: block; margin-top: 2rem;">
+                <h3 class="result-title">Number System Information</h3>
+                <div class="result-details">
+                    <strong>Binary (Base 2):</strong> Uses digits 0, 1<br>
+                    <strong>Octal (Base 8):</strong> Uses digits 0-7<br>
+                    <strong>Decimal (Base 10):</strong> Uses digits 0-9<br>
+                    <strong>Hexadecimal (Base 16):</strong> Uses digits 0-9, A-F<br><br>
+                    <strong>Examples:</strong><br>
+                    Decimal 255 = Binary 11111111 = Octal 377 = Hex FF
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function updateInputPlaceholder() {
+            const inputBase = document.getElementById('input-base').value;
+            const inputField = document.getElementById('input-value');
+            
+            const placeholders = {
+                '2': 'Enter binary number (e.g., 1010)',
+                '8': 'Enter octal number (e.g., 377)',
+                '10': 'Enter decimal number (e.g., 255)',
+                '16': 'Enter hexadecimal number (e.g., FF)'
+            };
+            
+            inputField.placeholder = placeholders[inputBase];
+            
+            // Clear result when changing input base
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function validateInput(value, base) {
+            if (!value || value.trim() === '') {
+                throw new Error('Please enter a value');
+            }
+            
+            value = value.trim().toUpperCase();
+            
+            const validChars = {
+                '2': '01',
+                '8': '01234567',
+                '10': '0123456789',
+                '16': '0123456789ABCDEF'
+            };
+            
+            for (let char of value) {
+                if (!validChars[base].includes(char)) {
+                    throw new Error(`Invalid character "${char}" for base ${base}`);
+                }
+            }
+            
+            return value;
+        }
+
+        function convertFromBase(value, fromBase) {
+            // Convert to decimal first
+            return parseInt(value, fromBase);
+        }
+
+        function convertToBase(decimal, toBase) {
+            if (decimal === 0) return '0';
+            
+            let result = '';
+            const digits = '0123456789ABCDEF';
+            
+            while (decimal > 0) {
+                result = digits[decimal % toBase] + result;
+                decimal = Math.floor(decimal / toBase);
+            }
+            
+            return result;
+        }
+
+        function getBinaryBreakdown(decimal) {
+            const binary = decimal.toString(2);
+            const breakdown = [];
+            
+            for (let i = 0; i < binary.length; i++) {
+                const bit = binary[i];
+                const position = binary.length - 1 - i;
+                const value = bit === '1' ? Math.pow(2, position) : 0;
+                
+                if (bit === '1') {
+                    breakdown.push(`2^${position} = ${value}`);
+                }
+            }
+            
+            return breakdown.reverse();
+        }
+
+        function getCommonValues(decimal) {
+            const common = [
+                { name: 'Byte boundary', values: [0, 255, 256, 511, 512, 1023, 1024] },
+                { name: 'Powers of 2', values: [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048] },
+                { name: 'Common hex', values: [15, 16, 31, 32, 63, 64, 127, 128, 255, 256] }
+            ];
+            
+            for (let category of common) {
+                if (category.values.includes(decimal)) {
+                    return category.name;
+                }
+            }
+            
+            return null;
+        }
+
+        function convertNumber() {
+            try {
+                const inputBase = parseInt(document.getElementById('input-base').value);
+                const inputValue = document.getElementById('input-value').value;
+                
+                const validatedInput = validateInput(inputValue, inputBase);
+                
+                // Convert to decimal first
+                const decimalValue = convertFromBase(validatedInput, inputBase);
+                
+                if (decimalValue > Number.MAX_SAFE_INTEGER) {
+                    throw new Error('Number is too large for accurate conversion');
+                }
+                
+                // Check which conversions are requested
+                const conversions = [];
+                
+                if (document.getElementById('to-decimal').checked) {
+                    conversions.push({
+                        name: 'Decimal',
+                        base: 10,
+                        value: decimalValue.toString(),
+                        prefix: ''
+                    });
+                }
+                
+                if (document.getElementById('to-binary').checked) {
+                    conversions.push({
+                        name: 'Binary',
+                        base: 2,
+                        value: decimalValue.toString(2),
+                        prefix: '0b'
+                    });
+                }
+                
+                if (document.getElementById('to-octal').checked) {
+                    conversions.push({
+                        name: 'Octal',
+                        base: 8,
+                        value: decimalValue.toString(8),
+                        prefix: '0o'
+                    });
+                }
+                
+                if (document.getElementById('to-hex').checked) {
+                    conversions.push({
+                        name: 'Hexadecimal',
+                        base: 16,
+                        value: decimalValue.toString(16).toUpperCase(),
+                        prefix: '0x'
+                    });
+                }
+                
+                if (conversions.length === 0) {
+                    throw new Error('Please select at least one output format');
+                }
+                
+                // Generate results
+                const conversionResults = conversions.map(conv => 
+                    `<div class="result-value">${conv.name}: ${conv.prefix}${conv.value}</div>`
+                ).join('');
+                
+                // Binary breakdown
+                const binaryBreakdown = getBinaryBreakdown(decimalValue);
+                const breakdownText = binaryBreakdown.length > 0 ? 
+                    `<br><strong>Binary Breakdown:</strong><br>${binaryBreakdown.join(' + ')} = ${decimalValue}` : '';
+                
+                // Additional information
+                const bitCount = decimalValue.toString(2).length;
+                const byteCount = Math.ceil(bitCount / 8);
+                const commonValue = getCommonValues(decimalValue);
+                
+                let additionalInfo = `
+                    <br><strong>Additional Information:</strong>
+                    <div class="result-details">Bit length: ${bitCount} bits</div>
+                    <div class="result-details">Byte requirement: ${byteCount} byte(s)</div>
+                `;
+                
+                if (commonValue) {
+                    additionalInfo += `<div class="result-details">Category: ${commonValue}</div>`;
+                }
+                
+                // Powers of 2 check
+                if (decimalValue > 0 && (decimalValue & (decimalValue - 1)) === 0) {
+                    const power = Math.log2(decimalValue);
+                    additionalInfo += `<div class="result-details">Power of 2: 2^${power}</div>`;
+                }
+                
+                document.getElementById('result').innerHTML = `
+                    <h3 class="result-title">Number System Conversions</h3>
+                    ${conversionResults}
+                    <div class="result-details">Input: ${validatedInput} (base ${inputBase})</div>
+                    ${breakdownText}
+                    ${additionalInfo}
+                `;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+
+        // Real-time conversion on input
+        document.getElementById('input-value').addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                try {
+                    // Quick validation and conversion
+                    const inputBase = parseInt(document.getElementById('input-base').value);
+                    const validatedInput = validateInput(this.value, inputBase);
+                    const decimalValue = convertFromBase(validatedInput, inputBase);
+                    
+                    if (decimalValue <= 1000000) { // Only auto-convert for reasonable numbers
+                        convertNumber();
+                    }
+                } catch (error) {
+                    // Ignore errors during typing
+                }
+            }
+        });
+    </script>
+</body>
+</html>

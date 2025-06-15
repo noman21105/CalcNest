@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Calculator - CalcNest</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CalcNest</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="calculator-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">Tax Calculator</h1>
+            <p class="page-description">Calculate sales tax, VAT, and total amounts</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-group">
+                <label class="input-label">Calculation Type:</label>
+                <select id="calculation-type" class="select-field" onchange="toggleCalculationType()">
+                    <option value="add-tax">Add Tax to Amount</option>
+                    <option value="remove-tax">Remove Tax from Amount</option>
+                    <option value="tax-only">Calculate Tax Only</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label" id="amount-label">Amount (before tax) ($):</label>
+                <input type="number" id="amount" class="input-field" placeholder="Enter amount" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Tax Rate (%):</label>
+                <input type="number" id="tax-rate" class="input-field" placeholder="Enter tax rate" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Tax Type (optional):</label>
+                <select id="tax-type" class="select-field">
+                    <option value="sales">Sales Tax</option>
+                    <option value="vat">VAT</option>
+                    <option value="gst">GST</option>
+                    <option value="custom">Custom Tax</option>
+                </select>
+            </div>
+
+            <button onclick="calculateTax()" class="calculate-btn">Calculate Tax</button>
+
+            <div id="result" class="result-section" style="display: none;">
+                <h3 class="result-title">Tax Calculation Results</h3>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js"></script>
+    <script>
+        function toggleCalculationType() {
+            const type = document.getElementById('calculation-type').value;
+            const amountLabel = document.getElementById('amount-label');
+            
+            switch (type) {
+                case 'add-tax':
+                    amountLabel.textContent = 'Amount (before tax) ($):';
+                    break;
+                case 'remove-tax':
+                    amountLabel.textContent = 'Amount (including tax) ($):';
+                    break;
+                case 'tax-only':
+                    amountLabel.textContent = 'Amount (before tax) ($):';
+                    break;
+            }
+        }
+
+        function calculateTax() {
+            try {
+                const calculationType = document.getElementById('calculation-type').value;
+                const amount = validateInput(document.getElementById('amount').value, 0);
+                const taxRate = validateInput(document.getElementById('tax-rate').value, 0);
+                const taxType = document.getElementById('tax-type').value;
+                
+                let baseAmount, taxAmount, totalAmount;
+                
+                switch (calculationType) {
+                    case 'add-tax':
+                        baseAmount = amount;
+                        taxAmount = (baseAmount * taxRate) / 100;
+                        totalAmount = baseAmount + taxAmount;
+                        break;
+                        
+                    case 'remove-tax':
+                        totalAmount = amount;
+                        baseAmount = totalAmount / (1 + taxRate / 100);
+                        taxAmount = totalAmount - baseAmount;
+                        break;
+                        
+                    case 'tax-only':
+                        baseAmount = amount;
+                        taxAmount = (baseAmount * taxRate) / 100;
+                        totalAmount = baseAmount + taxAmount;
+                        break;
+                }
+                
+                const taxTypeNames = {
+                    sales: 'Sales Tax',
+                    vat: 'VAT',
+                    gst: 'GST',
+                    custom: 'Custom Tax'
+                };
+                
+                // Calculate different quantity scenarios
+                const quantities = [1, 5, 10, 100];
+                const bulkCalculations = quantities.map(qty => {
+                    return {
+                        qty: qty,
+                        base: baseAmount * qty,
+                        tax: taxAmount * qty,
+                        total: totalAmount * qty
+                    };
+                });
+                
+                let bulkHtml = '<br><strong>Bulk Purchase Calculator:</strong><br>';
+                bulkCalculations.forEach(calc => {
+                    bulkHtml += `${calc.qty} items: Base $${formatNumber(Math.round(calc.base * 100) / 100)}, Tax $${formatNumber(Math.round(calc.tax * 100) / 100)}, Total $${formatNumber(Math.round(calc.total * 100) / 100)}<br>`;
+                });
+                
+                let resultHtml = `
+                    <h3 class="result-title">${taxTypeNames[taxType]} Calculation</h3>
+                `;
+                
+                if (calculationType === 'tax-only') {
+                    resultHtml += `<div class="result-value">Tax Amount: $${formatNumber(Math.round(taxAmount * 100) / 100)}</div>`;
+                } else {
+                    resultHtml += `<div class="result-value">Total (including tax): $${formatNumber(Math.round(totalAmount * 100) / 100)}</div>`;
+                }
+                
+                resultHtml += `
+                    <div class="result-details">Base Amount: $${formatNumber(Math.round(baseAmount * 100) / 100)}</div>
+                    <div class="result-details">${taxTypeNames[taxType]} (${taxRate}%): $${formatNumber(Math.round(taxAmount * 100) / 100)}</div>
+                    <div class="result-details">Total Amount: $${formatNumber(Math.round(totalAmount * 100) / 100)}</div>
+                    <div class="result-details">Tax as % of total: ${Math.round((taxAmount / totalAmount) * 10000) / 100}%</div>
+                    <div class="result-details">Effective tax rate: ${Math.round(taxRate * 100) / 100}%</div>
+                    ${bulkHtml}
+                `;
+                
+                // Add common tax rate comparisons
+                const commonRates = [5, 7.5, 10, 12.5, 15, 20, 25];
+                let comparisonHtml = '<br><strong>Tax Rate Comparison (on $' + formatNumber(Math.round(baseAmount * 100) / 100) + '):</strong><br>';
+                commonRates.forEach(rate => {
+                    const compTax = (baseAmount * rate) / 100;
+                    const compTotal = baseAmount + compTax;
+                    comparisonHtml += `${rate}%: Tax $${formatNumber(Math.round(compTax * 100) / 100)}, Total $${formatNumber(Math.round(compTotal * 100) / 100)}<br>`;
+                });
+                
+                resultHtml += `<div class="result-details">${comparisonHtml}</div>`;
+                
+                document.getElementById('result').innerHTML = resultHtml;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').classList.add('fade-in');
+                
+            } catch (error) {
+                showError('result', error.message);
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
