@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CalcNest - Comprehensive Calculator Suite</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <header>
         <div class="container">
-            <h1>CalcNest</h1>
+            <h1>CalcHub</h1>
             <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
                 <span class="theme-icon">🌙</span>
             </button>
@@ -29,22 +31,22 @@
                     <button class="btn btn-secondary" onclick="clearEntry()">C</button>
                     <button class="btn btn-secondary" onclick="backspace()">⌫</button>
                     <button class="btn btn-operator" onclick="inputOperator('÷')">÷</button>
-                    
+
                     <button class="btn btn-number" onclick="inputNumber('7')">7</button>
                     <button class="btn btn-number" onclick="inputNumber('8')">8</button>
                     <button class="btn btn-number" onclick="inputNumber('9')">9</button>
                     <button class="btn btn-operator" onclick="inputOperator('×')">×</button>
-                    
+
                     <button class="btn btn-number" onclick="inputNumber('4')">4</button>
                     <button class="btn btn-number" onclick="inputNumber('5')">5</button>
                     <button class="btn btn-number" onclick="inputNumber('6')">6</button>
                     <button class="btn btn-operator" onclick="inputOperator('-')">-</button>
-                    
+
                     <button class="btn btn-number" onclick="inputNumber('1')">1</button>
                     <button class="btn btn-number" onclick="inputNumber('2')">2</button>
                     <button class="btn btn-number" onclick="inputNumber('3')">3</button>
                     <button class="btn btn-operator" onclick="inputOperator('+')">+</button>
-                    
+
                     <button class="btn btn-number btn-zero" onclick="inputNumber('0')">0</button>
                     <button class="btn btn-number" onclick="inputDecimal()">.</button>
                     <button class="btn btn-equals" onclick="calculate()">=</button>
@@ -110,4 +112,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
